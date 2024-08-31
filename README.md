@@ -4,11 +4,9 @@
 
 **WORK IN PROGRESS (ALPHA)**
 
-This clock simulates a 7-segment display and uses USB gamepad inputs to set its
-time. The code demonstrates how to use a state machine to translate basic
-gamepad and RTC inputs into higher level behaviors. The hardware includes an
-Adafruit Feather TFT ESP32-S3, a MAX3421E USB Host FeatherWing, and an
-Adalogger FeatherWing RTC.
+This clock simulates a 7-segment display and uses USB gamepad input to set
+time. The code demonstrates how to use a state machine to translate basic input
+from a gamepad and real time clock chip into higher level behaviors.
 
 [**TODO:** project photo]
 
