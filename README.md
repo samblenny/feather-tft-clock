@@ -73,18 +73,18 @@ in Krita, an Adalogger FeatherWing, and USB gamepad input for setting the time.
 
 ### Pinouts
 
-| TFT feather | USB Host | ST7789 TFT | Adalogger            |
-| ----------- | -------- | ---------- | -------------------- |
-|  SCK        |  SCK     |            | SCK (SD)             |
-|  MOSI       |  MOSI    |            | MOSI (SD)            |
-|  MISO       |  MISO    |            | MISO (SD)            |
-|  SDA        |          |            | SDA (RTC)            |
-|  SCL        |          |            | SCL (RTC)            |
-|  D9         |  IRQ     |            |                      |
-|  D10        |  CS      |            | (Not SD CS!)         |
-|  D11        |          |            | CS (SD, wire jumper) |
-|  TFT_CS     |          |  CS        |                      |
-|  TFT_DC     |          |  DC        |                      |
+| TFT feather | USB Host | ST7789 TFT | Adalogger          |
+| ----------- | -------- | ---------- | ------------------ |
+|  SCK        |  SCK     |            | SCK (SD)           |
+|  MOSI       |  MOSI    |            | MOSI (SD)          |
+|  MISO       |  MISO    |            | MISO (SD)          |
+|  SDA        |          |            | SDA (RTC)          |
+|  SCL        |          |            | SCL (RTC)          |
+|  D9         |  IRQ     |            |                    |
+|  D10        |  CS      |            | (Not SDCS!)        |
+|  D11        |          |            | SDCS (wire jumper) |
+|  TFT_CS     |          |  CS        |                    |
+|  TFT_DC     |          |  DC        |                    |
 
 
 
