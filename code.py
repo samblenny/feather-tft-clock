@@ -9,18 +9,18 @@
 # - 8BitDo SN30 Pro USB gamepad
 #
 # Pinouts:
-# | TFT feather | USB Host | ST7789 TFT | Adalogger     |
-# | ----------- | -------- | ---------- | ------------- |
-# |  SCK        |  SCK     |            | SCK (SD)      |
-# |  MOSI       |  MOSI    |            | MOSI (SD)     |
-# |  MISO       |  MISO    |            | MISO (SD)     |
-# |  SDA        |          |            | SDA (RTC)     |
-# |  SCL        |          |            | SCL (RTC)     |
-# |  D9         |  IRQ     |            |               |
-# |  D10        |  CS      |            | (Not SD CS!)  |
-# |  D11        |          |            | CS (SD, wire) |
-# |  TFT_CS     |          |  CS        |               |
-# |  TFT_DC     |          |  DC        |               |
+# | TFT feather | USB Host | ST7789 TFT | Adalogger            |
+# | ----------- | -------- | ---------- | -------------------- |
+# |  SCK        |  SCK     |            | SCK (SD)             |
+# |  MOSI       |  MOSI    |            | MOSI (SD)            |
+# |  MISO       |  MISO    |            | MISO (SD)            |
+# |  SDA        |          |            | SDA (RTC)            |
+# |  SCL        |          |            | SCL (RTC)            |
+# |  D9         |  IRQ     |            |                      |
+# |  D10        |  CS      |            | (Not SD CS!)         |
+# |  D11        |          |            | CS (SD, wire jumper) |
+# |  TFT_CS     |          |  CS        |                      |
+# |  TFT_DC     |          |  DC        |                      |
 #
 # Related Documentation:
 # - https://learn.adafruit.com/adafruit-esp32-s3-tft-feather
