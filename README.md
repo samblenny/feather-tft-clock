@@ -144,10 +144,10 @@ If you are unfamiliar with soldering headers, you might want to read:
 12. Assemble the Adalogger FeatherWing with pin headers on a breadboard, then
     solder the headers in place.
 
-13. **IMPORTANT:** The Adalogger FeatherWing's default SD card CS pin conflicts
-    with the CS pin for the USB Host FeatherWing, so the Adalogger's SDCS
-    signal needs to be moved with a wire jumper. For pictures and more details,
-    please refer to the
+13. **IMPORTANT:** The Adalogger FeatherWing's default SD card CS pin is D10,
+    which conflicts with the CS pin for the USB Host FeatherWing, so the
+    Adalogger's SDCS signal needs to be moved with a wire jumper. For more
+    details, check out the
     [SD & SPI Pins](https://learn.adafruit.com/adafruit-adalogger-featherwing?view=all#sd-and-spi-pins-2933321)
     section of the Adalogger Learn Guide.
 
@@ -158,7 +158,7 @@ If you are unfamiliar with soldering headers, you might want to read:
     the jumper pads with a light scraping motion.
 
 14. Cut and strip a piece of 22AWG insulated hookup wire long enough to reach
-    from the SDCS plated hole over to the inner pad for the Adalogger's D11 pin
+    from the SDCS drilled pad over to the inner pad for the Adalogger's D11 pin
     (one pad closer to the battery holder).
 
 15. Clamp the Adalogger board in a vise, solder the jumper wire from the
