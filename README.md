@@ -49,6 +49,14 @@ in Krita, an Adalogger FeatherWing, and USB gamepad input for setting the time.
 
 - Solder
 
+- Fine point hobby knife with safety handle (X-ACTO or similar)
+
+- Solid-Core insulated 22AWG hookup wire (Adafruit
+  [#289](https://www.adafruit.com/product/289) or similar)
+
+- Wire strippers (Adafruit [#527](https://www.adafruit.com/product/527) or
+  similar)
+
 - Breadboard (Adafruit [#65](https://www.adafruit.com/product/65),
   [#239](https://www.adafruit.com/product/239),
   or similar)
@@ -135,6 +143,29 @@ If you are unfamiliar with soldering headers, you might want to read:
 
 12. Assemble the Adalogger FeatherWing with pin headers on a breadboard, then
     solder the headers in place.
+
+13. **IMPORTANT:** The Adalogger FeatherWing's default SD card CS pin conflicts
+    with the CS pin for the USB Host FeatherWing, so the Adalogger's SDCS
+    signal needs to be moved with a wire jumper. For pictures and more details,
+    please refer to the
+    [SD & SPI Pins](https://learn.adafruit.com/adafruit-adalogger-featherwing?view=all#sd-and-spi-pins-2933321)
+    section of the Adalogger Learn Guide.
+
+    Locate the Adalogger's SDCS silkscreen label next to the corner of its
+    micro SD card slot. Right next to the "CS" of the SDCS label, you should
+    see a jumper (two rectangular pads joined by a thin trace) along with a
+    round drilled pad. Use a fine point hobby knife to cut the trace between
+    the jumper pads with a light scraping motion.
+
+14. Cut and strip a piece of 22AWG insulated hookup wire long enough to reach
+    from the SDCS plated hole over to the inner pad for the Adalogger's D11 pin
+    (one pad closer to the battery holder).
+
+15. Clamp the Adalogger board in a vise, solder the jumper wire from the
+    bottom of the board, then trim the excess wire ends with flush cutters. The
+    end result should look like this:
+
+    ![Adafruit Adalogger FeatherWing with CS jumper wire](adalogger-cs-jumper.jpeg)
 
 
 ### Smoke Test and Final Assembly
