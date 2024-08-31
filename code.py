@@ -66,7 +66,7 @@ def handle_input(world, prev, buttons):
         pass
     if diff & buttons & START:  # START pressed
         pass
-    #print(f"{buttons:016b}")
+    print(f"{buttons:016b}")
 
 
 def main():
@@ -74,28 +74,22 @@ def main():
     gc.collect()
     spi = SPI()
 
-    # Initialize display
+    # Initialize ST7789 display with native display size of 240x135px.
+    #
+    # This uses 2x scaling and crops to an active of 240 px (15*16px) wide by
+    # 128 px (8*16px) tall. The result is that I can treat the display as a
+    # scene of 15 sprites wide by 8 sprites tall, using 8x8 px sprite tiles.
+    #
     bus = FourWire(spi, command=TFT_DC, chip_select=TFT_CS)
     display = ST7789(bus, rotation=270, width=240, height=135, rowstart=40,
         colstart=53, auto_refresh=False)
     gc.collect()
     # load spritesheet and palette
-    (bitmap, palette) = adafruit_imageload.load("sprites.bmp", bitmap=Bitmap,
+    (bitmap, palette) = adafruit_imageload.load("clock.png", bitmap=Bitmap,
         palette=Palette)
-    # assemble TileGrid with gamepad using sprites from the spritesheet
-    scene = TileGrid(bitmap, pixel_shader=palette, width=10, height=5,
-        tile_width=8, tile_height=8, default_tile=9)
-    tilemap = (
-        ( 0,  5,  2,  3,  3,  3,  3,  4,  5,  6),  # . L . . . . . . R .
-        ( 7,  9, 12,  9,  9,  9,  9, 17,  9, 13),  # . . dU. . . . X . .
-        ( 7, 18, 19, 20,  9,  9, 17,  9, 17, 13),  # . dL. dR. . Y . A .
-        ( 7,  9, 26,  9, 24, 25,  9, 17,  9, 13),  # . . dD. SeSt. B . .
-        (21, 23, 23, 23, 23, 23, 23, 23, 23, 27),  # . . . . . . . . . .
-    )
-    for (y, row) in enumerate(tilemap):
-        for (x, sprite) in enumerate(row):
-            scene[x, y] = sprite
-    grp = Group(scale=2)  # 2x zoom
+    scene = TileGrid(bitmap, pixel_shader=palette, width=1, height=1,
+        tile_width=168, tile_height=48, x=36, y=40)  # (240-168)/2=36, (128-48)/2=40
+    grp = Group(scale=1)
     grp.append(scene)
     display.root_group = grp
     display.refresh()
