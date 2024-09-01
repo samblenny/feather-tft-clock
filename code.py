@@ -85,12 +85,42 @@ def main():
         colstart=53, auto_refresh=False)
     gc.collect()
     # load spritesheet and palette
-    (bitmap, palette) = adafruit_imageload.load("clock.png", bitmap=Bitmap,
+    (bitmap, palette) = adafruit_imageload.load("digits.png", bitmap=Bitmap,
         palette=Palette)
-    scene = TileGrid(bitmap, pixel_shader=palette, width=1, height=1,
-        tile_width=168, tile_height=48, x=36, y=40)  # (240-168)/2=36, (128-48)/2=40
+    # Set up the 5 digit/dots sprites to build a 7-segment time display
+    # Each sprite is 3*8px wide by 6*8 px high (= 24x48px). The hour and minute
+    # digits have a 16px horizontal gap between them, but the dots sprite only
+    # has an 8px gap on each side.
+    #
+    # The time display is 168x48px and the active screen area is 240x128px. So,
+    # to center time in the display, the top left corner coordinates should be:
+    #   ((240-168)/2, (128-48)/2) = (36, 40)
+    #
+    # Table of top-left sprite coordinates:
+    #    hour 10's digit: (36       , 40) = ( 36, 40)
+    #    hour  1's digit: (36+( 5*8), 40) = ( 76, 40)
+    #               dots: (36+( 9*8), 40) = (108, 40)
+    #  minute 10's digit: (36+(13*8), 40) = (140, 40)
+    #  minute  1's digit: (36+(18*8), 40) = (180, 40)
+    #
+    world = {
+        'hour10': TileGrid(bitmap, pixel_shader=palette, width=1, height=1,
+            tile_width=24, tile_height=48, x=36, y=40, default_tile=0),
+        'hour1': TileGrid(bitmap, pixel_shader=palette, width=1, height=1,
+            tile_width=24, tile_height=48, x=76, y=40, default_tile=1),
+        'dots': TileGrid(bitmap, pixel_shader=palette, width=1, height=1,
+            tile_width=24, tile_height=48, x=108, y=40, default_tile=10),
+        'min10': TileGrid(bitmap, pixel_shader=palette, width=1, height=1,
+            tile_width=24, tile_height=48, x=140, y=40, default_tile=2),
+        'min1': TileGrid(bitmap, pixel_shader=palette, width=1, height=1,
+            tile_width=24, tile_height=48, x=180, y=40, default_tile=3),
+    }
     grp = Group(scale=1)
-    grp.append(scene)
+    grp.append(world['hour10'])
+    grp.append(world['hour1'])
+    grp.append(world['dots'])
+    grp.append(world['min10'])
+    grp.append(world['min1'])
     display.root_group = grp
     display.refresh()
 
@@ -102,9 +132,6 @@ def main():
     sleep(0.1)
 
     # TODO: Initialize RTC
-
-    # Initialize global state
-    world = {"scene": scene, "clock": None}
 
     # MAIN EVENT LOOP
     # Establish and maintain a gamepad connection
