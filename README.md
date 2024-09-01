@@ -193,14 +193,14 @@ If you are unfamiliar with soldering headers, you might want to read:
 4MB Flash, you need to use the .BIN file (combination bootloader and
 CircuitPython core)**
 
-1. Download the CircuitPython 9.1.2 **.BIN** file from the
+1. Download the CircuitPython 9.1.3 **.BIN** file from the
    [Feather ESP32-S3 TFT PSRAM](https://circuitpython.org/board/adafruit_feather_esp32s3_tft/)
    page on circuitpython.org
 
 2. Follow the instructions in the
    [Web Serial ESPTool](https://learn.adafruit.com/circuitpython-with-esp32-quick-start/web-serial-esptool)
    section of the "CircuitPython on ESP32 Quick Start" learn guide to update
-   your board with CircuitPython 9.1.2. First erasing the board's contents,
+   your board with CircuitPython 9.1.3. First erasing the board's contents,
    then programming it with the .BIN file.
 
    If you encounter errors with the Adafruit ESPTool web application, you can
