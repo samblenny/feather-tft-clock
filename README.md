@@ -4,9 +4,12 @@
 
 **WORK IN PROGRESS (ALPHA)**
 
-This clock simulates a 7-segment display and uses USB gamepad input to set
-time. The code demonstrates how to use a state machine to translate basic input
-from a gamepad and real time clock chip into higher level behaviors.
+This clock has USB gamepad input for setting time.
+
+The code shows how to:
+- Set time with a state machine and USB gamepad
+- Simulate a seven segment display with sprites
+- Keep time with a Real Time Clock chip
 
 [**TODO:** project photo]
 
