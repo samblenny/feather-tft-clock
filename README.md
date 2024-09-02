@@ -5,7 +5,7 @@
 **WORK IN PROGRESS (ALPHA)**
 
 This clock uses USB gamepad input to set the time and date. The code shows how
-to make a state machine to set a Real Time Clock chip with button input events
+to make a state machine to set a Real Time Clock chip using button input events
 and a simulated seven segment display. The display uses sprites made in Krita.
 
 [**TODO:** project photo]
