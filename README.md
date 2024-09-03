@@ -10,14 +10,27 @@ and a simulated seven segment display. The display uses sprites made in Krita.
 
 [**TODO:** project photo]
 
-## Sprites
+
+## Sprites and Krita
+
+To draw a simulated 7-segment display on the Feather TFT's LCD screen, I made
+two different sprite sheets. One is for the digits to display numbers, and the
+other is for badges to indicate which mode the state machine is in. I split the
+digits and badges into two spritesheets because they have different shapes.
+
+This is a simulated display showing some numbers and all of the mode badges:
+
+![a simulated clock display with digits and mode indicators](clock-and-badges.png)
+
+
+### Clock Digits
 
 This is a Krita screenshot showing a zoomed in view of the spritesheet I made
-for seven-segment digits. I added sprite number overlays (black text on white
+for 7-segment digits. I added sprite number overlays (black text on white
 squares) to show how the sprite numbers work when the spritesheet is loaded as
 a bitmap for use with `displayio.TileGrid` in CircuitPython.
 
-![annotated Krita screenshot showing a zoomed view of a spritesheet](sprites-6x2-screenshot.png)
+![annotated Krita screenshot showing a spritesheet](sprites-6x2-screenshot.png)
 
 Each sprite is 24 pixels wide by 48 pixels high. The grid divisions in Krita
 are set to show solid grid lines at 24 pixel intervals and dotted grid lines at
@@ -41,6 +54,18 @@ PNG files. But, in practice, that doesn't matter much. If you use the Pixel Art
 brush to paint with a small number of colors, then export to PNG, the resulting
 files use indexed colors. Once you have the PNG file, you can convert to a BMP
 with GraphicsMagick if you want.
+
+
+## Mode Indicator Badges
+
+This is a Krita screenshot showing a zoomed in view of the spritesheet for the
+mode indicator badges:
+
+![annotated Krita screenshot showing a spritesheet](badge-sprites-screenshot.png)
+
+This time, the sprites are each 70 pixels wide by 22 pixels high. I added
+numbers in the bottom right corner of each sprite to show how the numbering
+works when the spritesheet is used with `displayio.TileGrid`.
 
 
 ## Hardware
