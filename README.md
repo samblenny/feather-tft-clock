@@ -67,6 +67,27 @@ This time, the sprites are each 70 pixels wide by 22 pixels high. I added
 numbers in the bottom right corner of each sprite to show how the numbering
 works when the spritesheet is used with `displayio.TileGrid`.
 
+This next screenshot shows how the badges are aligned on the screen:
+
+![screenshot showing alignment of mode badges on 5px grid](mode-badge-screenshot.png)
+
+I used this one find the (x, y) screen coordinates for the top left corner of
+each badge to use with initializing the `TileGrid` objects. Note how the grid
+is set to 5 pixels with 4 subdivisions. That results in major grid divisions
+(solid lines) at 20 pixel intervals with minor grid divisions (dotted lines) at
+5 pixel intervals.
+
+This is my table of top left corner coordinates measured from the screenshot:
+
+| Badge |  X  |  Y  |
+| ----- | --- | --- |
+| YEAR  |  10 |   5 |
+| MON   |  90 |   5 |
+| DAY   | 160 |   5 |
+| SET   |  10 | 100 |
+| HHMM  |  80 | 100 |
+| MMSS  | 160 | 100 |
+
 
 ## Hardware
 
