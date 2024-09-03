@@ -77,9 +77,13 @@ def main():
     display = ST7789(bus, rotation=270, width=240, height=135, rowstart=40,
         colstart=53, auto_refresh=False)
     gc.collect()
-    # load spritesheet and palette
-    (bitmap, palette) = adafruit_imageload.load("digit-sprites.bmp",
+    # load spritesheet and palette for digits
+    (bitmapD, paletteD) = adafruit_imageload.load("digit-sprites.bmp",
         bitmap=Bitmap, palette=Palette)
+    # load spritesheet and palette for badges
+    (bitmapB, paletteB) = adafruit_imageload.load("badge-sprites.bmp",
+        bitmap=Bitmap, palette=Palette)
+    gc.collect()
     # Set up the 5 digit/dots sprites to build a 7-segment time display
     # Each sprite is 3*8px wide by 6*8 px high (= 24x48px). The hour and minute
     # digits have a 16px horizontal gap between them, but the dots sprite only
@@ -89,7 +93,7 @@ def main():
     # to center time in the display, the top left corner coordinates should be:
     #   ((240-168)/2, (128-48)/2) = (36, 40)
     #
-    # Table of top-left sprite coordinates:
+    # Table of top-left sprite coordinates for digits:
     #    hour 10's digit: (36       , 40) = ( 36, 40)
     #    hour  1's digit: (36+( 5*8), 40) = ( 76, 40)
     #               dots: (36+( 9*8), 40) = (108, 40)
@@ -97,23 +101,43 @@ def main():
     #  minute  1's digit: (36+(18*8), 40) = (180, 40)
     #
     world = {
-        'hour10': TileGrid(bitmap, pixel_shader=palette, width=1, height=1,
+        'hour10': TileGrid(bitmapD, pixel_shader=paletteD, width=1, height=1,
             tile_width=24, tile_height=48, x=36, y=40, default_tile=0),
-        'hour1': TileGrid(bitmap, pixel_shader=palette, width=1, height=1,
+        'hour1': TileGrid(bitmapD, pixel_shader=paletteD, width=1, height=1,
             tile_width=24, tile_height=48, x=76, y=40, default_tile=1),
-        'dots': TileGrid(bitmap, pixel_shader=palette, width=1, height=1,
+        'dots': TileGrid(bitmapD, pixel_shader=paletteD, width=1, height=1,
             tile_width=24, tile_height=48, x=108, y=40, default_tile=10),
-        'min10': TileGrid(bitmap, pixel_shader=palette, width=1, height=1,
+        'min10': TileGrid(bitmapD, pixel_shader=paletteD, width=1, height=1,
             tile_width=24, tile_height=48, x=140, y=40, default_tile=2),
-        'min1': TileGrid(bitmap, pixel_shader=palette, width=1, height=1,
+        'min1': TileGrid(bitmapD, pixel_shader=paletteD, width=1, height=1,
             tile_width=24, tile_height=48, x=180, y=40, default_tile=3),
+        # Table of top-left sprite coordinates for mode badges
+        # | Badge |  X  |  Y  |
+        # | ----- | --- | --- |
+        # | YEAR  |  10 |   5 |
+        # | MON   |  90 |   5 |
+        # | DAY   | 160 |   5 |
+        # | SET   |  10 | 100 |
+        # | HHMM  |  80 | 100 |
+        # | MMSS  | 160 | 100 |
+        'YEAR': TileGrid(bitmapB, pixel_shader=paletteB, width=1, height=1,
+            tile_width=70, tile_height=22, x=10, y=5, default_tile=0),
+        'MON': TileGrid(bitmapB, pixel_shader=paletteB, width=1, height=1,
+            tile_width=70, tile_height=22, x=90, y=5, default_tile=1),
+        'DAY': TileGrid(bitmapB, pixel_shader=paletteB, width=1, height=1,
+            tile_width=70, tile_height=22, x=160, y=5, default_tile=2),
+        'SET': TileGrid(bitmapB, pixel_shader=paletteB, width=1, height=1,
+            tile_width=70, tile_height=22, x=10, y=100, default_tile=3),
+        'HHMM': TileGrid(bitmapB, pixel_shader=paletteB, width=1, height=1,
+            tile_width=70, tile_height=22, x=80, y=100, default_tile=4),
+        'MMSS': TileGrid(bitmapB, pixel_shader=paletteB, width=1, height=1,
+            tile_width=70, tile_height=22, x=160, y=100, default_tile=5),
     }
+    gc.collect()
     grp = Group(scale=1)
-    grp.append(world['hour10'])
-    grp.append(world['hour1'])
-    grp.append(world['dots'])
-    grp.append(world['min10'])
-    grp.append(world['min1'])
+    for k in 'hour10 hour1 dots min10 min1 YEAR MON DAY SET HHMM MMSS'.split():
+        gc.collect()
+        grp.append(world[k])
     display.root_group = grp
     display.refresh()
 
