@@ -23,7 +23,7 @@ This is a simulated display showing some numbers and all of the mode badges:
 ![a simulated clock display with digits and mode indicators](clock-and-badges.png)
 
 
-### Clock Digits
+### Clock Digit Sprites
 
 This is a Krita screenshot showing a zoomed in view of the spritesheet I made
 for 7-segment digits. I added sprite number overlays (black text on white
@@ -56,7 +56,7 @@ files use indexed colors. Once you have the PNG file, you can convert to a BMP
 with GraphicsMagick if you want.
 
 
-## Mode Indicator Badges
+## Mode Indicator Badge Sprites
 
 This is a Krita screenshot showing a zoomed in view of the spritesheet for the
 mode indicator badges:
