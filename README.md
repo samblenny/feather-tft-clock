@@ -38,8 +38,8 @@ palette swatch that I defined on my own. Krita doesn't provide a way to get
 detailed control over how indexed color palettes are saved when you export to
 PNG files. But, in practice, that doesn't matter much. If you use the Pixel Art
 brush to paint with a small number of colors, then export to PNG, the resulting
-files use indexed colors. From PNG, you can convert to a BMP file with
-GraphicsMagick if you want.
+files use indexed colors. Once you have the PNG file, you can convert to a BMP
+with GraphicsMagick if you want.
 
 
 ## Hardware
