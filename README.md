@@ -13,14 +13,14 @@ and a simulated seven segment display. The display uses sprites made in Krita.
 
 ## Sprites and Krita
 
-To draw a simulated 7-segment display on the Feather TFT's LCD screen, I made
-two different sprite sheets. One is for the digits to display numbers, and the
-other is for badges to indicate which mode the state machine is in. I split the
-digits and badges into two spritesheets because they have different shapes.
-
-This is a simulated display showing some numbers and all of the mode badges:
+This simulated Feather TFT screen image shows some numbers on the time display
+along with all of the possible mode badges:
 
 ![a simulated clock display with digits and mode indicators](clock-and-badges.png)
+
+When the code runs, only one or two badges appear on the screen at the same
+time. But, the point here is to explain what I did in Krita and how I got the
+coordinates to draw sprites in the right spots.
 
 
 ### Clock Digit Sprites
