@@ -22,6 +22,16 @@ When the code runs, only one or two badges appear on the screen at the same
 time. But, the point here is to explain what I did in Krita and how I got the
 coordinates to draw sprites in the right spots.
 
+To draw the sprites in Krita, I used the "Pixel Art" brush preset with a custom
+palette swatch that I defined on my own. Krita doesn't provide a way to get
+detailed control over how indexed color palettes are saved when you export to
+PNG files. But, in practice, that doesn't matter much. If you use the Pixel Art
+brush to paint with a small number of colors, then export to PNG, the resulting
+files use indexed colors.
+
+As of CircuitPython 9.1.3, BMP files still work better than PNG for
+spritesheets. But, PNG support will probably catch up to BMP soon.
+
 
 ### Clock Digit Sprites
 
@@ -47,35 +57,26 @@ The `gm convert` shell command requires that you have the Debian GraphicsMagick
 package installed (`sudo apt install graphicsmagick`). ImageMagick would also
 work.
 
-To draw the sprites in Krita, I used the "Pixel Art" brush preset with a custom
-palette swatch that I defined on my own. Krita doesn't provide a way to get
-detailed control over how indexed color palettes are saved when you export to
-PNG files. But, in practice, that doesn't matter much. If you use the Pixel Art
-brush to paint with a small number of colors, then export to PNG, the resulting
-files use indexed colors. Once you have the PNG file, you can convert to a BMP
-with GraphicsMagick if you want.
-
 
 ## Mode Indicator Badge Sprites
 
-This is a Krita screenshot showing a zoomed in view of the spritesheet for the
-mode indicator badges:
+This Krita screenshot shows a zoomed in view of the spritesheet for the mode
+indicator badges:
 
 ![annotated Krita screenshot showing a spritesheet](badge-sprites-screenshot.png)
 
-This time, the sprites are each 70 pixels wide by 22 pixels high. I added
-numbers in the bottom right corner of each sprite to show how the numbering
-works when the spritesheet is used with `displayio.TileGrid`.
+The sprites are each 70 pixels wide by 22 pixels high. I added numbers in the
+bottom right corner of each sprite to show how the numbering works when the
+spritesheet is used with `displayio.TileGrid`.
 
 This next screenshot shows how the badges are aligned on the screen:
 
 ![screenshot showing alignment of mode badges on 5px grid](mode-badge-screenshot.png)
 
-I used this one find the (x, y) screen coordinates for the top left corner of
-each badge to use with initializing the `TileGrid` objects. Note how the grid
-is set to 5 pixels with 4 subdivisions. That results in major grid divisions
-(solid lines) at 20 pixel intervals with minor grid divisions (dotted lines) at
-5 pixel intervals.
+Note how the grid is set to 5 pixels with 4 subdivisions. That results in solid
+grid lines at 20 pixel intervals with dotted grid lines at 5 pixel intervals. I
+used the grid to find the (x, y) screen coordinates for the top left corner of
+each badge to use with initializing the `TileGrid` objects.
 
 This is my table of top left corner coordinates measured from the screenshot:
 
