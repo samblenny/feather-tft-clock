@@ -8,7 +8,7 @@ This clock uses USB gamepad input to set the time and date. The code shows how
 to make a state machine to set a Real Time Clock chip using button input events
 and a simulated seven segment display. The display uses sprites made in Krita.
 
-[**TODO:** project photo]
+![photo of assembled hardware showing sprite demo on Feather TFT display](feather-tft-clock.jpeg)
 
 
 ## Sprites and Krita
