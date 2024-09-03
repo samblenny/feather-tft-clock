@@ -23,6 +23,24 @@ Each sprite is 24 pixels wide by 48 pixels high. The grid divisions in Krita
 are set to show solid grid lines at 24 pixel intervals and dotted grid lines at
 8 pixel subdivisions.
 
+To get from a Krita document to a BMP spritesheet, I did:
+
+1. In Krita: File menu > Export... > (export sprites as a PNG file)
+
+2. In Debian terminal shell: `gm convert sprites.png BMP3:sprites.bmp`
+
+The `gm convert` shell command requires that you have the Debian GraphicsMagick
+package installed (`sudo apt install graphicsmagick`). ImageMagick would also
+work.
+
+To draw the sprites in Krita, I used the "Pixel Art" brush preset with a custom
+palette swatch that I defined on my own. Krita doesn't provide a way to get
+detailed control over how indexed color palettes are saved when you export to
+PNG files. But, in practice, that doesn't matter much. If you use the Pixel Art
+brush to paint with a small number of colors, then export to PNG, the resulting
+files use indexed colors. From PNG, you can convert to a BMP file with
+GraphicsMagick if you want.
+
 
 ## Hardware
 
