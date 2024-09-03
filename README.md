@@ -25,9 +25,10 @@ are set to show solid grid lines at 24 pixel intervals and dotted grid lines at
 
 To get from a Krita document to a BMP spritesheet, I did:
 
-1. In Krita: File menu > Export... > (export sprites as a PNG file)
+1. In Krita: File menu > Export... > (export PNG file: digit-sprites.png)
 
-2. In Debian terminal shell: `gm convert sprites.png BMP3:sprites.bmp`
+2. In Debian terminal shell:
+   `gm convert digit-sprites.png BMP3:digit-sprites.bmp`
 
 The `gm convert` shell command requires that you have the Debian GraphicsMagick
 package installed (`sudo apt install graphicsmagick`). ImageMagick would also
