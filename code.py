@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: Copyright 2024 Sam Blenny
 #
-# feather-tft-gamepad
-#
 # Hardware:
 # - Adafruit ESP32-S3 TFT Feather - 4MB Flash, 2MB PSRAM (#5483)
 # - Adafruit USB Host FeatherWing with MAX3421E (#5858)
@@ -75,18 +73,13 @@ def main():
     spi = SPI()
 
     # Initialize ST7789 display with native display size of 240x135px.
-    #
-    # This uses 2x scaling and crops to an active of 240 px (15*16px) wide by
-    # 128 px (8*16px) tall. The result is that I can treat the display as a
-    # scene of 15 sprites wide by 8 sprites tall, using 8x8 px sprite tiles.
-    #
     bus = FourWire(spi, command=TFT_DC, chip_select=TFT_CS)
     display = ST7789(bus, rotation=270, width=240, height=135, rowstart=40,
         colstart=53, auto_refresh=False)
     gc.collect()
     # load spritesheet and palette
-    (bitmap, palette) = adafruit_imageload.load("digits.png", bitmap=Bitmap,
-        palette=Palette)
+    (bitmap, palette) = adafruit_imageload.load("digit-sprites.bmp",
+        bitmap=Bitmap, palette=Palette)
     # Set up the 5 digit/dots sprites to build a 7-segment time display
     # Each sprite is 3*8px wide by 6*8 px high (= 24x48px). The hour and minute
     # digits have a 16px horizontal gap between them, but the dots sprite only

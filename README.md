@@ -10,7 +10,18 @@ and a simulated seven segment display. The display uses sprites made in Krita.
 
 [**TODO:** project photo]
 
-[**TODO:** spritesheet]
+## Sprites
+
+This is a Krita screenshot showing a zoomed in view of the spritesheet I made
+for seven segment digits. I added sprite number overlays (black text on white
+squares) to show how the sprite numbers will work once the spritesheet is
+loaded as a bitmap to use with `displayio.TileGrid` in CircuitPython.
+
+![annotated Krita screenshot showing a zoomed view of a spritesheet](sprites-6x2-screenshot.png)
+
+Each sprite is 24 pixels wide by 48 pixels high. The grid divisions in Krita
+are set to show solid grid lines at 24 pixel intervals and dotted grid lines at
+8 pixel subdivisions.
 
 
 ## Hardware
