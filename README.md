@@ -13,7 +13,7 @@ and a simulated seven segment display. The display uses sprites made in Krita.
 ## Sprites
 
 This is a Krita screenshot showing a zoomed in view of the spritesheet I made
-for seven segment digits. I added sprite number overlays (black text on white
+for seven-segment digits. I added sprite number overlays (black text on white
 squares) to show how the sprite numbers work when the spritesheet is loaded as
 a bitmap for use with `displayio.TileGrid` in CircuitPython.
 
