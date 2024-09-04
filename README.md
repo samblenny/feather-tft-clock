@@ -106,14 +106,14 @@ should happen for USB gamepad button presses:
 
 The state machine has 3 major modes:
 
-1) Demo Mode shows a demo screen that makes it easy to take a photo of how all
-   the sprites look on the LCD.
+1) **Demo Mode** shows a demo screen that makes it easy to take a photo of how
+   all the sprites look on the LCD.
 
-2) Clock Mode shows the current time or date. Since the numeric display only
-   has 4 digits, there are sub-modes to show hours and minutes (hhmm), minutes
-   and seconds (mmss), year, month (mon), or day.
+2) **Clock Mode** shows the current time or date. Since the numeric display
+   only has 4 digits, there are sub-modes to show hours and minutes (hhmm),
+   minutes and seconds (mmss), year, month (mon), or day.
 
-3) Set Mode lets you set the clock's year, month, day, hour, minutes, and
+3) **Set Mode** lets you set the clock's year, month, day, hour, minutes, and
    seconds. Set Mode has the same sub-modes as Clock Mode.
 
 
