@@ -87,20 +87,19 @@ The clock's state machine is a moderately complicated. So, I used a spreadsheet
 to make a table of all the states along with actions and state transitions that
 should happen for gamepad button presses:
 
-| State | UP | DOWN | LEFT | RIGHT | A | B | X | Y | START | SELECT |
-| ----- | -- | ---- | ---- | ----- | - | - | - | - | ----- | ------ |
-| demo | hhmm | hhmm | hhmm | hhmm | hhmm | hhmm | help | hhmm | hhmm | hhmm |
-| help | hhmm | hhmm | hhmm | hhmm | hhmm | hhmm | hhmm | demo | hhmm | hhmm |
-| year | -- | -- | year | mon | -- | hhmm | help | demo | -- | set\_year |
-| mon | -- | -- | mmss | day | -- | hhmm | help | demo | -- | set\_mon |
-| day | -- | -- | hhmm | hhmm | -- | hhmm | help | demo | -- | set\_day |
-| hhmm | -- | -- | day | mmss | -- | hhmm | help | demo | -- | set\_min |
-| mmss | -- | -- | mon | year | -- | hhmm | help | demo | -- | set\_sec |
-| set\_year | year(+1) | year(-1) | set\_sec | set\_mon | -- | hhmm | help | demo | -- | hhmm |
-| set\_mon | mon(+1) | mon(-1) | set\_year | set\_day | -- | hhmm | help | demo | -- | hhmm |
-| set\_day | day(+1) | day(-1) | set\_mon | set\_min | -- | hhmm | help | demo | -- | hhmm |
-| set\_min | min(+1) | min(-1) | set\_day | set\_sec | -- | hhmm | help | demo | -- | hhmm |
-| set\_sec | sec(=0) | sec(=0) | set\_min | set\_year | sec(=0) | hhmm | help | demo | -- | hhmm |
+| State   | UP      | DOWN    | LEFT    | RIGHT   | A    | B    | SELECT  |
+| ------- | ------- | ------- | ------- | ------- | ---- | ---- | ------- |
+| demo    | hhmm    | hhmm    | hhmm    | hhmm    | hhmm | hhmm | hhmm    |
+| year    | --      | --      | year    | mon     | demo | hhmm | setYear |
+| mon     | --      | --      | mmss    | day     | demo | hhmm | setMon  |
+| day     | --      | --      | hhmm    | hhmm    | demo | hhmm | setDay  |
+| hhmm    | --      | --      | day     | mmss    | demo | hhmm | setMin  |
+| mmss    | --      | --      | mon     | year    | demo | hhmm | setSec  |
+| setYear | year+=1 | year-=1 | setSec  | setMon  | --   | hhmm | hhmm    |
+| setMon  | mon+=1  | mon-=1  | setYear | setDay  | --   | hhmm | hhmm    |
+| setDay  | day+=1  | day-=1  | setMon  | setMin  | --   | hhmm | hhmm    |
+| setMin  | min+=1  | min-=1  | setDay  | setSec  | --   | hhmm | hhmm    |
+| setSec  | sec=0   | sec=0   | setMin  | setYear | --   | hhmm | hhmm    |
 
 
 
