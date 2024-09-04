@@ -85,22 +85,71 @@ This is my table of top left corner coordinates measured from the screenshot:
 
 The clock's state machine is a moderately complicated. So, I used a spreadsheet
 to make a table of all the states along with actions and state transitions that
-should happen for gamepad button presses:
+should happen for USB gamepad button presses:
 
-| State   | UP      | DOWN    | LEFT    | RIGHT   | A    | B    | SELECT  |
-| ------- | ------- | ------- | ------- | ------- | ---- | ---- | ------- |
-| demo    | hhmm    | hhmm    | hhmm    | hhmm    | hhmm | hhmm | hhmm    |
-| year    | --      | --      | year    | mon     | demo | hhmm | setYear |
-| mon     | --      | --      | mmss    | day     | demo | hhmm | setMon  |
-| day     | --      | --      | hhmm    | hhmm    | demo | hhmm | setDay  |
-| hhmm    | --      | --      | day     | mmss    | demo | hhmm | setMin  |
-| mmss    | --      | --      | mon     | year    | demo | hhmm | setSec  |
-| setYear | year+=1 | year-=1 | setSec  | setMon  | --   | hhmm | hhmm    |
-| setMon  | mon+=1  | mon-=1  | setYear | setDay  | --   | hhmm | hhmm    |
-| setDay  | day+=1  | day-=1  | setMon  | setMin  | --   | hhmm | hhmm    |
-| setMin  | min+=1  | min-=1  | setDay  | setSec  | --   | hhmm | hhmm    |
-| setSec  | sec=0   | sec=0   | setMin  | setYear | --   | hhmm | hhmm    |
+| State   | UP     | DOWN   | LEFT    | RIGHT   | A       | B    | A+B  | SELECT  |
+| ------- | ------ | ------ | ------- | ------- | ------- | ---- | ---- | ------- |
+| demo    | hhmm   | hhmm   | hhmm    | hhmm    | hhmm    | hhmm | demo | hhmm    |
+| hhmm    | -      | -      | day     | mmss    | -       | hhmm | demo | setMin  |
+| mmss    | -      | -      | mon     | year    | -       | hhmm | demo | setSec  |
+| year    | -      | -      | year    | mon     | -       | hhmm | demo | setYear |
+| mon     | -      | -      | mmss    | day     | -       | hhmm | demo | setYear |
+| day     | -      | -      | hhmm    | hhmm    | -       | hhmm | demo | setYear |
+| setYear | year++ | year-- | -       | -       | setMon  | hhmm | demo | hhmm    |
+| setMon  | mon++  | mon--  | -       | -       | setDay  | hhmm | demo | hhmm    |
+| setDay  | day++  | day--  | -       | -       | setMin  | hhmm | demo | hhmm    |
+| setMin  | min++  | min--  | -       | -       | setSec  | hhmm | demo | hhmm    |
+| setSec  | sec=0  | sec=0  | -       | -       | setYear | hhmm | demo | hhmm    |
 
+
+### Major Modes and Sub-modes
+
+The state machine has 3 major modes:
+
+1) Demo Mode shows a demo screen that makes it easy to take a photo of how all
+   the sprites look on the LCD.
+
+2) Clock Mode shows the current time or date. Since the numeric display only
+   has 4 digits, there are sub-modes to show hours and minutes (hhmm), minutes
+   and seconds (mmss), year, month (mon), or day.
+
+3) Time Set Mode lets you set the clock's year, month, day, hour, minutes,
+   and seconds. Time Set Mode has the same sub-modes as Clock Mode.
+
+
+### Order of Sub-modes
+
+In Clock Mode, the order of moving between sub-modes doesn't matter.
+
+If you read the next section closely, you may notice that Clock mode uses the
+LEFT and RIGHT buttons to move between sub-modes, while the Time Set Mode uses
+the A button instead. This is because calendar dates are tricky.
+
+For Time Set Mode, the order of sub-modes matters because the number of days in
+a month varies. To look up the number of days in a month, you must know which
+month of which year. To avoid setting the clock to a day that doesn't exist,
+the code for Time Set Mode moves through sub-modes in the order: year, month
+(mon), day, minutes (hhmm), seconds (mmss).
+
+
+### Button Actions
+
+Clock Mode (all sub-modes):
+- **LEFT** or **RIGHT**: rotate through the sub-modes
+- **B**: Switch back to the hours and minutes sub-mode (hhmm)
+- **A+B**: Switch to Demo Mode
+- **SELECT**: Switch to Time Set Mode, starting at the current sub-mode
+
+Time Set Mode (sub-modes: year, month, day, and minutes (hhmm)):
+- **UP**: Add 1 to the value being set
+- **DOWN**: Subtract 1 from the value being set
+- **A**: Advance to the next sub-mode in sequence: year, mon, day, min, sec
+- **B** or **SELECT**: Stop setting the time and switch back to Clock Mode
+
+Time Set Mode (sub-mode: seconds (mmss)):
+- **UP** or **DOWN**: Round minutes to closest minute, setting seconds to 00
+- **A**: Switch to the next sub-mode (sequence: year, mon, day, min, sec)
+- **B** or **SELECT**: Stop setting the time and switch back to Clock Mode
 
 
 ## Hardware
