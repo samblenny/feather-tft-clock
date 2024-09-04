@@ -4,30 +4,21 @@
 
 **WORK IN PROGRESS (ALPHA)**
 
-This clock uses USB gamepad input to set the time and date. The code shows how
-to make a state machine to set a Real Time Clock chip using button input events
-and a simulated seven segment display. The display uses sprites made in Krita.
+This clock's display uses TileGrid sprites that I made in Krita. The code shows
+how to set time a date using a state machine with USB gamepad button inputs.
+The display in this photo is real, not a simulation.
 
 ![photo of assembled hardware showing sprite demo on Feather TFT display](feather-tft-clock.jpeg)
 
 
 ## Sprites and Krita
 
-This simulated Feather TFT screen image shows some numbers on the time display
-along with all of the possible mode badges:
-
-![a simulated clock display with digits and mode indicators](clock-and-badges.png)
-
-When the code runs, only one or two badges appear on the screen at the same
-time. But, the point here is to explain what I did in Krita and how I got the
-coordinates to draw sprites in the right spots.
-
-To draw the sprites in Krita, I used the "Pixel Art" brush preset with a custom
-palette swatch that I defined on my own. Krita doesn't provide a way to get
-detailed control over how indexed color palettes are saved when you export to
-PNG files. But, in practice, that doesn't matter much. If you use the Pixel Art
-brush to paint with a small number of colors, then export to PNG, the resulting
-files use indexed colors.
+To make the sprites in Krita for digits and mode badge, I used the "Pixel Art"
+brush preset with a custom palette swatch that I defined on my own. Krita
+doesn't provide a way to get detailed control over how indexed color palettes
+are saved when you export to PNG files. But, in practice, that doesn't matter
+much. If you use the Pixel Art brush to paint with a small number of colors,
+then export to PNG, the resulting files use indexed colors.
 
 As of CircuitPython 9.1.3, BMP files still work better than PNG for
 spritesheets. But, PNG support will probably catch up to BMP soon.
