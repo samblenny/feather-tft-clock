@@ -127,9 +127,9 @@ button instead. This is because calendar dates are tricky.
 
 For Set Mode, the order of sub-modes matters because the number of days in a
 month varies. To look up the number of days in a month, you must know which
-month of which year. To avoid setting the clock to a day that doesn't exist,
-the code for Set Mode moves through sub-modes in the order: year, month (mon),
-day, minutes (hhmm), seconds (mmss).
+month of which year. To avoid setting the date to a calendar day that doesn't
+exist, the code for Set Mode moves through sub-modes in the order: year, month
+(mon), day, minutes (hhmm), seconds (mmss).
 
 
 ### Button Actions
