@@ -113,8 +113,8 @@ The state machine has 3 major modes:
    has 4 digits, there are sub-modes to show hours and minutes (hhmm), minutes
    and seconds (mmss), year, month (mon), or day.
 
-3) Time Set Mode lets you set the clock's year, month, day, hour, minutes,
-   and seconds. Time Set Mode has the same sub-modes as Clock Mode.
+3) Set Mode lets you set the clock's year, month, day, hour, minutes, and
+   seconds. Set Mode has the same sub-modes as Clock Mode.
 
 
 ### Order of Sub-modes
@@ -122,14 +122,14 @@ The state machine has 3 major modes:
 In Clock Mode, the order of moving between sub-modes doesn't matter.
 
 If you read the next section closely, you may notice that Clock mode uses the
-LEFT and RIGHT buttons to move between sub-modes, while the Time Set Mode uses
-the A button instead. This is because calendar dates are tricky.
+LEFT and RIGHT buttons to move between sub-modes, while the Set Mode uses the A
+button instead. This is because calendar dates are tricky.
 
-For Time Set Mode, the order of sub-modes matters because the number of days in
-a month varies. To look up the number of days in a month, you must know which
+For Set Mode, the order of sub-modes matters because the number of days in a
+month varies. To look up the number of days in a month, you must know which
 month of which year. To avoid setting the clock to a day that doesn't exist,
-the code for Time Set Mode moves through sub-modes in the order: year, month
-(mon), day, minutes (hhmm), seconds (mmss).
+the code for Set Mode moves through sub-modes in the order: year, month (mon),
+day, minutes (hhmm), seconds (mmss).
 
 
 ### Button Actions
@@ -138,15 +138,15 @@ Clock Mode (all sub-modes):
 - **LEFT** or **RIGHT**: rotate through the sub-modes
 - **B**: Switch back to the hours and minutes sub-mode (hhmm)
 - **A+B**: Switch to Demo Mode
-- **SELECT**: Switch to Time Set Mode, starting at the current sub-mode
+- **SELECT**: Switch to Set Mode, starting at the current sub-mode
 
-Time Set Mode (sub-modes: year, month, day, and minutes (hhmm)):
+Set Mode (sub-modes: year, month, day, and minutes (hhmm)):
 - **UP**: Add 1 to the value being set
 - **DOWN**: Subtract 1 from the value being set
 - **A**: Advance to the next sub-mode in sequence: year, mon, day, min, sec
 - **B** or **SELECT**: Stop setting the time and switch back to Clock Mode
 
-Time Set Mode (sub-mode: seconds (mmss)):
+Set Mode (sub-mode: seconds (mmss)):
 - **UP** or **DOWN**: Round minutes to closest minute, setting seconds to 00
 - **A**: Switch to the next sub-mode (sequence: year, mon, day, min, sec)
 - **B** or **SELECT**: Stop setting the time and switch back to Clock Mode
