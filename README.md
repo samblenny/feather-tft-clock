@@ -95,10 +95,10 @@ should happen for USB gamepad button presses:
 | year    | -      | -      | year    | mon     | -       | hhmm | demo | setYear |
 | mon     | -      | -      | mmss    | day     | -       | hhmm | demo | setYear |
 | day     | -      | -      | hhmm    | hhmm    | -       | hhmm | demo | setYear |
-| setYear | year++ | year-- | -       | -       | setMon  | hhmm | demo | hhmm    |
-| setMon  | mon++  | mon--  | -       | -       | setDay  | hhmm | demo | hhmm    |
-| setDay  | day++  | day--  | -       | -       | setMin  | hhmm | demo | hhmm    |
-| setMin  | min++  | min--  | -       | -       | setSec  | hhmm | demo | hhmm    |
+| setYear | year+1 | year-1 | -       | -       | setMon  | hhmm | demo | hhmm    |
+| setMon  | mon+1  | mon-1  | -       | -       | setDay  | hhmm | demo | hhmm    |
+| setDay  | day+1  | day-1  | -       | -       | setMin  | hhmm | demo | hhmm    |
+| setMin  | min+1  | min-1  | -       | -       | setSec  | hhmm | demo | hhmm    |
 | setSec  | sec=0  | sec=0  | -       | -       | setYear | hhmm | demo | hhmm    |
 
 
