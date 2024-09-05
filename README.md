@@ -87,19 +87,19 @@ The clock's state machine is moderately complicated. So, I used a spreadsheet
 to make a table of all the states along with actions and state transitions that
 should happen for USB gamepad button presses:
 
-| State   | UP     | DOWN   | LEFT    | RIGHT   | A       | B    | A+B  | SELECT  |
-| ------- | ------ | ------ | ------- | ------- | ------- | ---- | ---- | ------- |
-| demo    | hhmm   | hhmm   | hhmm    | hhmm    | hhmm    | hhmm | demo | hhmm    |
-| hhmm    | -      | -      | day     | mmss    | -       | hhmm | demo | setMin  |
-| mmss    | -      | -      | mon     | year    | -       | hhmm | demo | setSec  |
-| year    | -      | -      | year    | mon     | -       | hhmm | demo | setYear |
-| mon     | -      | -      | mmss    | day     | -       | hhmm | demo | setYear |
-| day     | -      | -      | hhmm    | hhmm    | -       | hhmm | demo | setYear |
-| setYear | year+1 | year-1 | -       | -       | setMon  | hhmm | demo | hhmm    |
-| setMon  | mon+1  | mon-1  | -       | -       | setDay  | hhmm | demo | hhmm    |
-| setDay  | day+1  | day-1  | -       | -       | setMin  | hhmm | demo | hhmm    |
-| setMin  | min+1  | min-1  | -       | -       | setSec  | hhmm | demo | hhmm    |
-| setSec  | sec=0  | sec=0  | -       | -       | setYear | hhmm | demo | hhmm    |
+| State   | UP     | DOWN   | LEFT | RIGHT | A       | B    | A+B  | SELECT  |
+| ------- | ------ | ------ | ---- | ----- | ------- | ---- | ---- | ------- |
+| demo    | hhmm   | hhmm   | hhmm | hhmm  | hhmm    | hhmm | demo | hhmm    |
+| hhmm    | -      | -      | day  | mmss  | -       | hhmm | demo | setMin  |
+| mmss    | -      | -      | mon  | year  | -       | hhmm | demo | setSec  |
+| year    | -      | -      | year | mon   | -       | hhmm | demo | setYear |
+| mon     | -      | -      | mmss | day   | -       | hhmm | demo | setYear |
+| day     | -      | -      | hhmm | hhmm  | -       | hhmm | demo | setYear |
+| setYear | year+1 | year-1 | -    | -     | setMon  | hhmm | demo | hhmm    |
+| setMon  | mon+1  | mon-1  | -    | -     | setDay  | hhmm | demo | hhmm    |
+| setDay  | day+1  | day-1  | -    | -     | setMin  | hhmm | demo | hhmm    |
+| setMin  | min+1  | min-1  | -    | -     | setSec  | hhmm | demo | hhmm    |
+| setSec  | sec=0  | sec=0  | -    | -     | setYear | hhmm | demo | hhmm    |
 
 
 ### Major Modes and Sub-modes
