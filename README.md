@@ -83,7 +83,7 @@ This is my table of top left corner coordinates measured from the screenshot:
 
 ## State Machine
 
-The clock's state machine is a moderately complicated. So, I used a spreadsheet
+The clock's state machine is moderately complicated. So, I used a spreadsheet
 to make a table of all the states along with actions and state transitions that
 should happen for USB gamepad button presses:
 
