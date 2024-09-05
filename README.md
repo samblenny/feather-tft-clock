@@ -121,15 +121,13 @@ The state machine has 3 major modes:
 
 In Clock Mode, the order of moving between sub-modes doesn't matter.
 
-If you read the next section closely, you may notice that Clock mode uses the
-LEFT and RIGHT buttons to move between sub-modes, while the Set Mode uses the A
-button instead. This is because calendar dates are tricky.
+In Set Mode, the order of sub-modes matters because calendar dates are tricky.
 
-For Set Mode, the order of sub-modes matters because the number of days in a
-month varies. To look up the number of days in a month, you must know which
-month of which year. To avoid setting the date to a calendar day that doesn't
-exist, the code for Set Mode moves through sub-modes in the order: year, month
-(mon), day, minutes (hhmm), seconds (mmss).
+For code to look up the number of days in a month, it must know which month of
+which year. When you use Set Mode, its code checks the numbers you enter to be
+sure they represent a valid calendar date that actually exists. To make that
+checking possible, the code requires you to move through sub-modes in the
+order: year, month (mon), day, minutes (hhmm), seconds (mmss).
 
 
 ### Button Actions
