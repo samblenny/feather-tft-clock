@@ -19,7 +19,7 @@
 #
 from micropython import const
 
-# State Transition Constants
+# State Transition Constants (private)
 # CAUTION: These values must match row indexes of StateMachine.TABLE
 _Demo   = const(0)
 _HHMM   = const(1)
@@ -45,7 +45,8 @@ _MinInc = const(18)
 _MinDec = const(19)
 _Sec00  = const(20)
 
-# Digit Sprite Constants (private) for modifying number TileGrid objects
+# Digit Sprite Constants (private)
+# These are for modifying the digit sprite TileGrid objects
 _D0   = const( 0)
 _D1   = const( 1)
 _D2   = const( 2)
@@ -59,7 +60,8 @@ _D9   = const( 9)
 _DCol = const(10)  # colon
 _DBlk = const(11)  # solid black
 
-# Badge Sprite Constants (private) for modifying mode badge TileGrid objects
+# Badge Sprite Constants (private)
+# These are for updating the mode badge sprite TileGrid objects
 _BYr   = const(0)
 _BMon  = const(1)
 _BDay  = const(2)
