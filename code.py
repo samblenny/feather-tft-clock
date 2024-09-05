@@ -115,15 +115,15 @@ def main():
         TileGrid(bitmapD, pixel_shader=paletteD, width=1, height=1,
             tile_width=24, tile_height=48, x=180, y=40, default_tile=3),
     )
-        # Table of top-left sprite coordinates for mode badges
-        # | Badge |  X  |  Y  |
-        # | ----- | --- | --- |
-        # | YEAR  |  10 |   5 |
-        # | MON   |  90 |   5 |
-        # | DAY   | 160 |   5 |
-        # | SET   |  10 | 100 |
-        # | HHMM  |  80 | 100 |
-        # | MMSS  | 160 | 100 |
+    # Table of top-left sprite coordinates for mode badges
+    # | Badge |  X  |  Y  |
+    # | ----- | --- | --- |
+    # | YEAR  |  10 |   5 |
+    # | MON   |  90 |   5 |
+    # | DAY   | 160 |   5 |
+    # | SET   |  10 | 100 |
+    # | HHMM  |  80 | 100 |
+    # | MMSS  | 160 | 100 |
     badges = {
         'YEAR': TileGrid(bitmapB, pixel_shader=paletteB, width=1, height=1,
             tile_width=70, tile_height=22, x=10, y=5, default_tile=0),
