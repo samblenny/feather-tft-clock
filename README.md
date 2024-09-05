@@ -90,16 +90,16 @@ should happen for USB gamepad button presses:
 | State   | UP     | DOWN   | LEFT | RIGHT | A       | B    | A+B  | SELECT  |
 | ------- | ------ | ------ | ---- | ----- | ------- | ---- | ---- | ------- |
 | demo    | hhmm   | hhmm   | hhmm | hhmm  | hhmm    | hhmm | demo | hhmm    |
-| hhmm    | -      | -      | day  | mmss  | -       | hhmm | demo | setMin  |
-| mmss    | -      | -      | mon  | year  | -       | hhmm | demo | setSec  |
-| year    | -      | -      | year | mon   | -       | hhmm | demo | setYear |
-| mon     | -      | -      | mmss | day   | -       | hhmm | demo | setYear |
-| day     | -      | -      | hhmm | hhmm  | -       | hhmm | demo | setYear |
-| setYear | year+1 | year-1 | -    | -     | setMon  | hhmm | demo | hhmm    |
-| setMon  | mon+1  | mon-1  | -    | -     | setDay  | hhmm | demo | hhmm    |
-| setDay  | day+1  | day-1  | -    | -     | setMin  | hhmm | demo | hhmm    |
-| setMin  | min+1  | min-1  | -    | -     | setSec  | hhmm | demo | hhmm    |
-| setSec  | sec=0  | sec=0  | -    | -     | setYear | hhmm | demo | hhmm    |
+| hhmm    | nop    | nop    | day  | mmss  | nop     | hhmm | demo | setMin  |
+| mmss    | nop    | nop    | hhmm | year  | nop     | hhmm | demo | setSec  |
+| year    | nop    | nop    | mmss | mon   | nop     | hhmm | demo | setYear |
+| mon     | nop    | nop    | year | day   | nop     | hhmm | demo | setYear |
+| day     | nop    | nop    | mon  | hhmm  | nop     | hhmm | demo | setYear |
+| setYear | year+1 | year-1 | nop  | nop   | setMon  | hhmm | demo | hhmm    |
+| setMon  | mon+1  | mon-1  | nop  | nop   | setDay  | hhmm | demo | hhmm    |
+| setDay  | day+1  | day-1  | nop  | nop   | setMin  | hhmm | demo | hhmm    |
+| setMin  | min+1  | min-1  | nop  | nop   | setSec  | hhmm | demo | hhmm    |
+| setSec  | sec=0  | sec=0  | nop  | nop   | setYear | hhmm | demo | hhmm    |
 
 
 ### Major Modes and Sub-modes

@@ -39,31 +39,29 @@ import adafruit_imageload
 from adafruit_st7789 import ST7789
 from gamepad import (
     XInputGamepad, UP, DOWN, LEFT, RIGHT, START, SELECT, A, B, X, Y)
+from statemachine import StateMachine
 
 
-def handle_input(world, prev, buttons):
+def handle_input(machine, prev, buttons):
     # Respond to gamepad button state change events
     diff = prev ^  buttons
-    if diff & buttons & A:  # A pressed
-        pass
-    if diff & buttons & B:  # B pressed
-        pass
-    if diff & buttons & X:  # X pressed
-        pass
-    if diff & buttons & Y:  # Y pressed
-        pass
-    if diff & buttons & UP:  # UP pressed
-        pass
-    if diff & buttons & DOWN:  # DOWN pressed
-        pass
-    if diff & buttons & LEFT:  # LEFT pressed
-        pass
-    if diff & buttons & RIGHT:  # RIGHT pressed
-        pass
-    if diff & buttons & SELECT:  # SELECT pressed
-        pass
-    if diff & buttons & START:  # START pressed
-        pass
+    mh = machine.handle
+    if (diff & (A | B)) and (buttons == (A | B)):  # A+B pressed
+        mh(machine.AB)
+    elif (diff & A) and (buttons == A):  # A pressed
+        mh(machine.A)
+    elif (diff & B) and (buttons == B):  # B pressed
+        mh(machine.B)
+    elif (diff & UP) and (buttons == UP):  # UP pressed
+        mh(machine.UP)
+    elif (diff & DOWN) and (buttons == DOWN):  # DOWN pressed
+        mh(machine.DOWN)
+    elif (diff & LEFT) and (buttons == LEFT):  # LEFT pressed
+        mh(machine.LEFT)
+    elif (diff & RIGHT) and (buttons == RIGHT):  # RIGHT pressed
+        mh(machine.RIGHT)
+    elif (diff & SELECT) and (buttons == SELECT):  # SELECT pressed
+        mh(machine.SELECT)
     print(f"{buttons:016b}")
 
 
@@ -100,17 +98,23 @@ def main():
     #  minute 10's digit: (36+(13*8), 40) = (140, 40)
     #  minute  1's digit: (36+(18*8), 40) = (180, 40)
     #
-    world = {
-        'hour10': TileGrid(bitmapD, pixel_shader=paletteD, width=1, height=1,
+    digits = (
+        # Most significant digit (N....)
+        TileGrid(bitmapD, pixel_shader=paletteD, width=1, height=1,
             tile_width=24, tile_height=48, x=36, y=40, default_tile=0),
-        'hour1': TileGrid(bitmapD, pixel_shader=paletteD, width=1, height=1,
+        # Second digit (.N...)
+        TileGrid(bitmapD, pixel_shader=paletteD, width=1, height=1,
             tile_width=24, tile_height=48, x=76, y=40, default_tile=1),
-        'dots': TileGrid(bitmapD, pixel_shader=paletteD, width=1, height=1,
+        # Colon (..:..)
+        TileGrid(bitmapD, pixel_shader=paletteD, width=1, height=1,
             tile_width=24, tile_height=48, x=108, y=40, default_tile=10),
-        'min10': TileGrid(bitmapD, pixel_shader=paletteD, width=1, height=1,
+        # Third digit (...N.)
+        TileGrid(bitmapD, pixel_shader=paletteD, width=1, height=1,
             tile_width=24, tile_height=48, x=140, y=40, default_tile=2),
-        'min1': TileGrid(bitmapD, pixel_shader=paletteD, width=1, height=1,
+        # Least significant digit (....N)
+        TileGrid(bitmapD, pixel_shader=paletteD, width=1, height=1,
             tile_width=24, tile_height=48, x=180, y=40, default_tile=3),
+    )
         # Table of top-left sprite coordinates for mode badges
         # | Badge |  X  |  Y  |
         # | ----- | --- | --- |
@@ -120,6 +124,7 @@ def main():
         # | SET   |  10 | 100 |
         # | HHMM  |  80 | 100 |
         # | MMSS  | 160 | 100 |
+    badges = {
         'YEAR': TileGrid(bitmapB, pixel_shader=paletteB, width=1, height=1,
             tile_width=70, tile_height=22, x=10, y=5, default_tile=0),
         'MON': TileGrid(bitmapB, pixel_shader=paletteB, width=1, height=1,
@@ -135,9 +140,12 @@ def main():
     }
     gc.collect()
     grp = Group(scale=1)
-    for k in 'hour10 hour1 dots min10 min1 YEAR MON DAY SET HHMM MMSS'.split():
+    for tg in digits:
         gc.collect()
-        grp.append(world[k])
+        grp.append(tg)
+    for (key, val) in badges.items():
+        gc.collect()
+        grp.append(val)
     display.root_group = grp
     display.refresh()
 
@@ -149,6 +157,9 @@ def main():
     sleep(0.1)
 
     # TODO: Initialize RTC
+
+    # Initialize State Machine in clock mode
+    machine = StateMachine(digits, badges)
 
     # MAIN EVENT LOOP
     # Establish and maintain a gamepad connection
@@ -165,7 +176,7 @@ def main():
                 while connected:
                     (connected, changed, buttons) = gp.poll()
                     if connected and changed:
-                        handle_input(world, prev, buttons)
+                        handle_input(machine, prev, buttons)
                         display.refresh()
                         prev = buttons
                     sleep(0.002)
