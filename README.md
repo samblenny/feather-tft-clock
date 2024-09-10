@@ -62,9 +62,11 @@ The sprites are each 6 pixels wide by 8 pixels high. The look is based on dot
 matrix character LCD fonts used in digital watches and serial character
 displays.
 
-The numbering for the ASCII sprites starts with 0 for the ASCII space character
-and continues to 127, which I use for a down arrow glyph. So, to translate from
-a Python string character (`c`) to a sprite number, I can do `ord(c) - 32`.
+Numbering for the character sprites starts with 0 for the ASCII space
+character. The last sprite number is 95, which corresponds to ASCII DEL
+character (127), which I used for a down arrow glyph. To translate from a
+Python string or byte to the sprite number, you subtract 32 from the
+character's ordinal number (`ord()`) or the byte's integer value.
 
 
 ## State Machine
