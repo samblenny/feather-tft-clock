@@ -28,15 +28,17 @@
 #
 from board import D9, D10, D11, I2C, SPI, TFT_CS, TFT_DC
 from digitalio import DigitalInOut, Direction
-from displayio import (Bitmap, Group, Palette, TileGrid, release_displays)
+from displayio import Bitmap, Group, Palette, TileGrid, release_displays
 from fourwire import FourWire
 import gc
 from max3421e import Max3421E
+from micropython import const
 from time import sleep
 from usb.core import USBError
 
 import adafruit_imageload
 from adafruit_st7789 import ST7789
+from charlcd import CharLCD
 from gamepad import (
     XInputGamepad, UP, DOWN, LEFT, RIGHT, START, SELECT, A, B, X, Y)
 from statemachine import StateMachine
@@ -71,16 +73,15 @@ def main():
     spi = SPI()
 
     # Initialize ST7789 display with native display size of 240x135px.
+    TFT_W = const(240)
+    TFT_H = const(135)
     bus = FourWire(spi, command=TFT_DC, chip_select=TFT_CS)
-    display = ST7789(bus, rotation=270, width=240, height=135, rowstart=40,
+    display = ST7789(bus, rotation=270, width=TFT_W, height=TFT_H, rowstart=40,
         colstart=53, auto_refresh=False)
     gc.collect()
     # load spritesheet and palette for digits
-    (bitmapD, paletteD) = adafruit_imageload.load("digit-sprites.bmp",
-        bitmap=Bitmap, palette=Palette)
-    # load spritesheet and palette for badges
-    (bitmapB, paletteB) = adafruit_imageload.load("badge-sprites.bmp",
-        bitmap=Bitmap, palette=Palette)
+    (bitmapD, paletteD) = adafruit_imageload.load(
+        "digit-sprites.bmp", bitmap=Bitmap, palette=Palette)
     gc.collect()
     # Set up the 5 digit/dots sprites to build a 7-segment time display
     # Each sprite is 3*8px wide by 6*8 px high (= 24x48px). The hour and minute
@@ -115,37 +116,21 @@ def main():
         TileGrid(bitmapD, pixel_shader=paletteD, width=1, height=1,
             tile_width=24, tile_height=48, x=180, y=40, default_tile=3),
     )
-    # Table of top-left sprite coordinates for mode badges
-    # | Badge |  X  |  Y  |
-    # | ----- | --- | --- |
-    # | YEAR  |  10 |   5 |
-    # | MON   |  90 |   5 |
-    # | DAY   | 160 |   5 |
-    # | SET   |  10 | 100 |
-    # | HHMM  |  80 | 100 |
-    # | MMSS  | 160 | 100 |
-    badges = {
-        'YEAR': TileGrid(bitmapB, pixel_shader=paletteB, width=1, height=1,
-            tile_width=70, tile_height=22, x=10, y=5, default_tile=0),
-        'MON': TileGrid(bitmapB, pixel_shader=paletteB, width=1, height=1,
-            tile_width=70, tile_height=22, x=90, y=5, default_tile=1),
-        'DAY': TileGrid(bitmapB, pixel_shader=paletteB, width=1, height=1,
-            tile_width=70, tile_height=22, x=160, y=5, default_tile=2),
-        'SET': TileGrid(bitmapB, pixel_shader=paletteB, width=1, height=1,
-            tile_width=70, tile_height=22, x=10, y=100, default_tile=3),
-        'HHMM': TileGrid(bitmapB, pixel_shader=paletteB, width=1, height=1,
-            tile_width=70, tile_height=22, x=80, y=100, default_tile=4),
-        'MMSS': TileGrid(bitmapB, pixel_shader=paletteB, width=1, height=1,
-            tile_width=70, tile_height=22, x=160, y=100, default_tile=5),
-    }
+    # Configure the character display areas at top and bottom of screen.
+    # This uses a 6x8 px spritesheet font for ASCII characters (32..127).
+    SCALE = 2
+    PAD = 2
+    COLS = 20
+    Y1 = (TFT_H // SCALE) - 8 - PAD
+    charLCD = CharLCD(cols=COLS, x=0, y0=PAD, y1=Y1, scale=SCALE)
+
+    # Add all the TileGrids to the display's root group
     gc.collect()
     grp = Group(scale=1)
     for tg in digits:
         gc.collect()
         grp.append(tg)
-    for (key, val) in badges.items():
-        gc.collect()
-        grp.append(val)
+    grp.append(charLCD.group())
     display.root_group = grp
     display.refresh()
 
@@ -159,12 +144,15 @@ def main():
     # TODO: Initialize RTC
 
     # Initialize State Machine in clock mode
-    machine = StateMachine(digits, badges)
+    machine = StateMachine(digits, charLCD)
 
     # MAIN EVENT LOOP
     # Establish and maintain a gamepad connection
     gp = XInputGamepad()
+    FINDING = b'Finding USB gamepad'
     print("Looking for USB gamepad...")
+    charLCD.setMsg(FINDING, top=False)
+    display.refresh()
     while True:
         gc.collect()
         try:
@@ -173,6 +161,8 @@ def main():
                 print(gp.device_info_str())
                 connected = True
                 prev = 0
+                charLCD.setMsg(b'gamepad ready', top=False)
+                display.refresh()
                 while connected:
                     (connected, changed, buttons) = gp.poll()
                     if connected and changed:
@@ -184,6 +174,8 @@ def main():
                 # If loop stopped, gamepad connection was lost
                 print("Gamepad disconnected")
                 print("Looking for USB gamepad...")
+                charLCD.setMsg(FINDING, top=False)
+                display.refresh()
             else:
                 # No connection yet, so sleep briefly then try again
                 sleep(0.1)
@@ -194,6 +186,8 @@ def main():
             print(e)
             print("Gamepad connection error")
             print("Looking for USB gamepad...")
+            charLCD.setMsg(FINDING, top=False)
+            display.refresh()
 
 
 main()

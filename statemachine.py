@@ -60,16 +60,6 @@ _D9   = const( 9)
 _DCol = const(10)  # colon
 _DBlk = const(11)  # solid black
 
-# Badge Sprite Constants (private)
-# These are for updating the mode badge sprite TileGrid objects
-_BYr   = const(0)
-_BMon  = const(1)
-_BDay  = const(2)
-_BSet  = const(3)
-_BHHMM = const(4)
-_BMMSS = const(5)
-_BBlk  = const(6)
-
 
 class StateMachine:
 
@@ -101,10 +91,10 @@ class StateMachine:
         (_Sec00,  _Sec00,  _NOP,  _NOP,  _SetYr,  _HHMM, _Demo, _HHMM  ),  # setSec
     )
 
-    def __init__(self, digits, badges):
+    def __init__(self, digits, charLCD):
         # Save references to the collections of sprite TileGrid objects
         self.digits = digits
-        self.badges = badges
+        self.charLCD = charLCD
         # Start in the state for Clock Mode with hours and minutes sub-mode
         self.state = _HHMM
         # TODO: Change this to use the Adalogger FeatherWing RTC chip
@@ -116,7 +106,6 @@ class StateMachine:
         self.rtcSec  = 00
         # Set initial display state
         self._setDigits(_D1, _D2, _DCol, _D0, _D0)
-        self._setBadges(_BBlk, _BBlk, _BBlk, _BBlk, _BBlk, _BBlk)
 
 
     def _setDigits(self, a, b, c, d, e):
@@ -136,34 +125,6 @@ class StateMachine:
             dgts[4][0] = e
 
 
-    def _setBadges(self, yr, mon, day, set_, hhmm, mmss):
-        # Set mode badges according to booleans: yr, mon, ... mmss
-        # True means show the badge, False means show a black rectangle
-
-        # Cache frequently used TileGrid object references
-        tgYEAR = self.badges['YEAR']
-        tgMON  = self.badges['MON']
-        tgDAY  = self.badges['DAY']
-        tgSET  = self.badges['SET']
-        tgHHMM = self.badges['HHMM']
-        tgMMSS = self.badges['MMSS']
-
-        # These check the old values of the badges in an attempt to minimize
-        # the area of the display which needs to be refreshed.
-        if yr != (tgYEAR[0] == _BYr):
-            tgYEAR[0] = _BYr  if yr else _BBlk
-        if mon != (tgMON[0] == _BMon):
-            tgMON[0]  = _BMon if mon else _BBlk
-        if day != (tgDAY[0] == _BDay):
-            tgDAY[0]  = _BDay if day else _BBlk
-        if set_ != (tgSET[0] == _BSet):
-            tgSET[0]  = _BSet if set_ else _BBlk
-        if hhmm != (tgHHMM[0] == _BHHMM):
-            tgHHMM[0] = _BHHMM if hhmm else _BBlk
-        if mmss != (tgMMSS[0] == _BMMSS):
-            tgMMSS[0] = _BMMSS if mmss else _BBlk
-
-
     def handle(self, button):
         # Handle a button press event
 
@@ -175,44 +136,52 @@ class StateMachine:
 
         # Cache frequently used functions
         setD = self._setDigits
-        setB = self._setBadges
+        setMsg = self.charLCD.setMsg
 
         # Handle the response code
         # First, check for state transition codes
+        SET_HELP = "^:+ \x7f:- A:ok B:end"
         if r == _Demo:
             self.state = r
             setD(_D1, _D2, _DCol, _D3, _D4)
-            setB(True, True, True, True, True, True)
+            setMsg(b'DEMO MODE 2024-09-10')
+            setMsg(b'AaBb~!@#$%^&*()-=_+?', top=False)
         elif r == _HHMM:
             self.state = r
-            setB(False, False, False, False, False, False)
+            setMsg(b'')
+            setMsg(b'', top=False)
         elif r == _MMSS:
             self.state = r
-            setB(False, False, False, False, False, True)
+            setMsg(b'MM:SS')
         elif r == _Yr:
             self.state = r
-            setB(True, False, False, False, False, False)
+            setMsg(b'Year')
         elif r == _Mon:
             self.state = r
-            setB(False, True, False, False, False, False)
+            setMsg(b'Month')
         elif r == _Day:
             self.state = r
-            setB(False, False, True, False, False, False)
+            setMsg(b'Day')
         elif r == _SetYr:
             self.state = r
-            setB(True, False, False, True, False, False)
+            setMsg(b'    SET YEAR')
+            setMsg(SET_HELP, top=False)
         elif r == _SetMon:
             self.state = r
-            setB(False, True, False, True, False, False)
+            setMsg(b'    SET MON')
+            setMsg(SET_HELP, top=False)
         elif r == _SetDay:
             self.state = r
-            setB(False, False, True, True, False, False)
+            setMsg(b'    SET DAY')
+            setMsg(SET_HELP, top=False)
         elif r == _SetMin:
             self.state = r
-            setB(False, False, False, True, True, False)
+            setMsg(b'    SET MIN')
+            setMsg(SET_HELP, top=False)
         elif r == _SetSec:
             self.state = r
-            setB(False, False, False, True, False, True)
+            setMsg(b'    SET SEC')
+            setMsg(SET_HELP, top=False)
 
         # Second, check for action codes that don't change the state
         elif r == _NOP:

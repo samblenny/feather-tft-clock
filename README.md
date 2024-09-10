@@ -8,20 +8,22 @@ This clock's display uses TileGrid sprites that I made in Krita. The code shows
 how to set time a date using a state machine with USB gamepad button inputs.
 The display in this photo is real, not a simulation.
 
+**NOTE: THIS PHOTO IS OUT OF DATE**
+
 ![photo of assembled hardware showing sprite demo on Feather TFT display](feather-tft-clock.jpeg)
 
 
 ## Sprites and Krita
 
-To make the sprites in Krita for digits and mode badge, I used the "Pixel Art"
-brush preset with a custom palette swatch that I defined on my own. Krita
-doesn't provide a way to get detailed control over how indexed color palettes
-are saved when you export to PNG files. But, in practice, that doesn't matter
-much. If you use the Pixel Art brush to paint with a small number of colors,
-then export to PNG, the resulting files use indexed colors.
+To make the sprites in Krita for 7-segment digits and ASCII characters, I used
+the "Pixel Art" brush preset with a custom palette swatch that I defined on my
+own. Krita doesn't provide a way to get detailed control over how indexed color
+palettes are saved when you export to PNG files. But, in practice, that doesn't
+matter much. If you use the Pixel Art brush to paint with a small number of
+colors, then export to PNG, the resulting files use indexed colors.
 
 As of CircuitPython 9.1.3, BMP files still work better than PNG for
-spritesheets. But, PNG support will probably catch up to BMP soon.
+spritesheets. But, PNG support may catch up to BMP in the future.
 
 
 ### Clock Digit Sprites
@@ -49,36 +51,20 @@ package installed (`sudo apt install graphicsmagick`). ImageMagick would also
 work.
 
 
-## Mode Indicator Badge Sprites
+## ASCII Character Sprites
 
-This Krita screenshot shows a zoomed in view of the spritesheet for the mode
-indicator badges:
+This Krita screenshot shows a zoomed in view of the spritesheet for my ASCII
+character font:
 
-![annotated Krita screenshot showing a spritesheet](badge-sprites-screenshot.png)
+![annotated Krita screenshot showing a spritesheet](ASCII-font-screenshot.png)
 
-The sprites are each 70 pixels wide by 22 pixels high. I added numbers in the
-bottom right corner of each sprite to show how the numbering works when the
-spritesheet is used with `displayio.TileGrid`.
+The sprites are each 6 pixels wide by 8 pixels high. The look is based on dot
+matrix character LCD fonts used in digital watches and serial character
+displays.
 
-This next screenshot shows how the badges are aligned on the screen:
-
-![screenshot showing alignment of mode badges on 5px grid](mode-badge-screenshot.png)
-
-Note how the grid is set to 5 pixels with 4 subdivisions. That results in solid
-grid lines at 20 pixel intervals with dotted grid lines at 5 pixel intervals. I
-used the grid to find the (x, y) screen coordinates for the top left corner of
-each badge to use with initializing the `TileGrid` objects.
-
-This is my table of top left corner coordinates measured from the screenshot:
-
-| Badge |  X  |  Y  |
-| ----- | --- | --- |
-| YEAR  |  10 |   5 |
-| MON   |  90 |   5 |
-| DAY   | 160 |   5 |
-| SET   |  10 | 100 |
-| HHMM  |  80 | 100 |
-| MMSS  | 160 | 100 |
+The numbering for the ASCII sprites starts with 0 for the ASCII space character
+and continues to 127, which I use for a down arrow glyph. So, to translate from
+a Python string character (`c`) to a sprite number, I can do `ord(c) - 32`.
 
 
 ## State Machine
