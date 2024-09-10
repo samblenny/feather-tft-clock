@@ -8,8 +8,6 @@ This clock's display uses TileGrid sprites that I made in Krita. The code shows
 how to set time a date using a state machine with USB gamepad button inputs.
 The display in this photo is real, not a simulation.
 
-**NOTE: THIS PHOTO IS OUT OF DATE**
-
 ![photo of assembled hardware showing sprite demo on Feather TFT display](feather-tft-clock.jpeg)
 
 
