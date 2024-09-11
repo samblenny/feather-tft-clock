@@ -62,8 +62,8 @@ displays.
 
 Numbering for the character sprites starts with 0 for the ASCII space
 character. The last sprite number is 95, which corresponds to ASCII DEL
-character (127), which I used for a down arrow glyph. To translate from a
-Python string or byte to the sprite number, you subtract 32 from the
+character (127), which I used for a custom up/down arrows glyph. To translate
+from a Python string or byte to the sprite number, you subtract 32 from the
 character's ordinal number (`ord()`) or the byte's integer value.
 
 
