@@ -45,21 +45,6 @@ _MinInc = const(18)
 _MinDec = const(19)
 _Sec00  = const(20)
 
-# Digit Sprite Constants (private)
-# These are for modifying the digit sprite TileGrid objects
-_D0   = const( 0)
-_D1   = const( 1)
-_D2   = const( 2)
-_D3   = const( 3)
-_D4   = const( 4)
-_D5   = const( 5)
-_D6   = const( 6)
-_D7   = const( 7)
-_D8   = const( 8)
-_D9   = const( 9)
-_DCol = const(10)  # colon
-_DBlk = const(11)  # solid black
-
 
 class StateMachine:
 
@@ -105,24 +90,7 @@ class StateMachine:
         self.rtcMin_ = 00
         self.rtcSec  = 00
         # Set initial display state
-        self._setDigits(_D1, _D2, _DCol, _D0, _D0)
-
-
-    def _setDigits(self, a, b, c, d, e):
-        # Update numeric sprites using digit sprite constants a, b, c, d, and e
-        dgts = self.digits
-        # These check the old values of the sprites in an attempt to minimize
-        # the area of the display which needs to be refreshed
-        if dgts[0][0] != a:  # leftmost digit:  0..9 or ' '
-            dgts[0][0] = a
-        if dgts[1][0] != b:  # second digit:    0..9 or ' '
-            dgts[1][0] = b
-        if dgts[2][0] != c:  # center position: ':' or ' '
-            dgts[2][0] = c
-        if dgts[3][0] != d:  # third digit:     0..9
-            dgts[3][0] = d
-        if dgts[4][0] != e:  # rightmost digit: 0..9
-            dgts[4][0] = e
+        self.digits.setDigits(b'12:34')
 
 
     def handle(self, button):
@@ -135,7 +103,7 @@ class StateMachine:
         r = self._TABLE[self.state][button]
 
         # Cache frequently used functions
-        setD = self._setDigits
+        setD = self.digits.setDigits
         setMsg = self.charLCD.setMsg
 
         # The help message for Set Mode uses a special up/down arrows sprite
@@ -146,44 +114,54 @@ class StateMachine:
         # First, check for state transition codes
         if r == _Demo:
             self.state = r
-            setD(_D1, _D2, _DCol, _D3, _D4)
+            setD(b'01:23')
             setMsg(b'DEMO MODE 2024-09-10')
             setMsg(b'AaBb~!@#$%^&*()-=_+?', top=False)
         elif r == _HHMM:
             self.state = r
+            setD(b'01:23')
             setMsg(b'')
             setMsg(b'', top=False)
         elif r == _MMSS:
             self.state = r
-            setMsg(b'MM:SS')
+            setD(b'23:00')
+            setMsg(b'         SECONDS')
         elif r == _Yr:
             self.state = r
-            setMsg(b'Year')
+            setD(b' 2024')
+            setMsg(b'            YEAR')
         elif r == _Mon:
             self.state = r
-            setMsg(b'Month')
+            setD(b'   09')
+            setMsg(b'           MONTH')
         elif r == _Day:
             self.state = r
-            setMsg(b'Day')
+            setD(b'   10')
+            setMsg(b'             DAY')
         elif r == _SetYr:
             self.state = r
-            setMsg(b'    SET YEAR')
+            setD(b' 2024')
+            setMsg(b'   SET      YEAR')
             setMsg(SET_HELP, top=False)
         elif r == _SetMon:
             self.state = r
-            setMsg(b'    SET MON')
+            setD(b'   09')
+            setMsg(b'   SET     MONTH')
             setMsg(SET_HELP, top=False)
         elif r == _SetDay:
             self.state = r
-            setMsg(b'    SET DAY')
+            setD(b'   10')
+            setMsg(b'   SET       DAY')
             setMsg(SET_HELP, top=False)
         elif r == _SetMin:
             self.state = r
-            setMsg(b'    SET MIN')
+            setD(b'01:23')
+            setMsg(b'   SET   MINUTES')
             setMsg(SET_HELP, top=False)
         elif r == _SetSec:
             self.state = r
-            setMsg(b'    SET SEC')
+            setD(b'23:00')
+            setMsg(b'   SET   SECONDS')
             setMsg(SET_HELP, top=False)
 
         # Second, check for action codes that don't change the state

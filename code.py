@@ -36,11 +36,11 @@ from micropython import const
 from time import sleep
 from usb.core import USBError
 
-import adafruit_imageload
 from adafruit_st7789 import ST7789
 from charlcd import CharLCD
 from gamepad import (
     XInputGamepad, UP, DOWN, LEFT, RIGHT, START, SELECT, A, B, X, Y)
+from sevenseg import SevenSeg
 from statemachine import StateMachine
 
 
@@ -79,43 +79,9 @@ def main():
     display = ST7789(bus, rotation=270, width=TFT_W, height=TFT_H, rowstart=40,
         colstart=53, auto_refresh=False)
     gc.collect()
-    # load spritesheet and palette for digits
-    (bitmapD, paletteD) = adafruit_imageload.load(
-        "digit-sprites.bmp", bitmap=Bitmap, palette=Palette)
-    gc.collect()
     # Set up the 5 digit/dots sprites to build a 7-segment time display
-    # Each sprite is 3*8px wide by 6*8 px high (= 24x48px). The hour and minute
-    # digits have a 16px horizontal gap between them, but the dots sprite only
-    # has an 8px gap on each side.
-    #
-    # The time display is 168x48px and the active screen area is 240x128px. So,
-    # to center time in the display, the top left corner coordinates should be:
-    #   ((240-168)/2, (128-48)/2) = (36, 40)
-    #
-    # Table of top-left sprite coordinates for digits:
-    #    hour 10's digit: (36       , 40) = ( 36, 40)
-    #    hour  1's digit: (36+( 5*8), 40) = ( 76, 40)
-    #               dots: (36+( 9*8), 40) = (108, 40)
-    #  minute 10's digit: (36+(13*8), 40) = (140, 40)
-    #  minute  1's digit: (36+(18*8), 40) = (180, 40)
-    #
-    digits = (
-        # Most significant digit (N....)
-        TileGrid(bitmapD, pixel_shader=paletteD, width=1, height=1,
-            tile_width=24, tile_height=48, x=36, y=40, default_tile=0),
-        # Second digit (.N...)
-        TileGrid(bitmapD, pixel_shader=paletteD, width=1, height=1,
-            tile_width=24, tile_height=48, x=76, y=40, default_tile=1),
-        # Colon (..:..)
-        TileGrid(bitmapD, pixel_shader=paletteD, width=1, height=1,
-            tile_width=24, tile_height=48, x=108, y=40, default_tile=10),
-        # Third digit (...N.)
-        TileGrid(bitmapD, pixel_shader=paletteD, width=1, height=1,
-            tile_width=24, tile_height=48, x=140, y=40, default_tile=2),
-        # Least significant digit (....N)
-        TileGrid(bitmapD, pixel_shader=paletteD, width=1, height=1,
-            tile_width=24, tile_height=48, x=180, y=40, default_tile=3),
-    )
+    # Each sprite is 5*8px wide by 6*8 px high (= 40x48px).
+
     # Configure the character display areas at top and bottom of screen.
     # This uses a 6x8 px spritesheet font for ASCII characters (32..127).
     SCALE = 2
@@ -123,14 +89,20 @@ def main():
     COLS = 20
     Y1 = (TFT_H // SCALE) - 8 - PAD
     charLCD = CharLCD(cols=COLS, x=0, y0=PAD, y1=Y1, scale=SCALE)
+    gc.collect()
 
-    # Add all the TileGrids to the display's root group
+    # Configure the 7-segment clock digits display area in the center of the
+    # screen. There are five 7-segment sprites, and each sprite is 32px wide by
+    # 48px high.
+    X = (TFT_W - (5 * 32)) // 2
+    Y = (TFT_H - 48) // 2
+    digits = SevenSeg(x=X, y=Y)
+
+    # Add the TileGrids to the display's root group
     gc.collect()
     grp = Group(scale=1)
-    for tg in digits:
-        gc.collect()
-        grp.append(tg)
     grp.append(charLCD.group())
+    grp.append(digits.group())
     display.root_group = grp
     display.refresh()
 

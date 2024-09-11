@@ -54,9 +54,13 @@ class CharLCD:
             n = char if (type(char) == int) else ord(char)
             if (n < ASCII_SPACE) or (ASCII_DEL < n):
                 n = ord('?')  # Replace out of range chars with '?'
-            _tg[i] = n - 32   # subtract 32 because sprite sheet starts at ' '
+            # Change sprite if current value differs from previous value
+            sprite = n - 32      # spritesheet starts at ' ', so subtract 32
+            if _tg[i] != sprite:
+                _tg[i] = sprite
 
         # Clear right padding area with space characters
         for i in range(len(msg), _cols):
-            _tg[i] = 0   # sprite sheet starts on ' ', so use 0 instead of 32
+            if _tg[i] != 0:
+                _tg[i] = 0   # spritesheet starts at ' ', so 0 is space
 

@@ -27,15 +27,16 @@ spritesheets. But, PNG support may catch up to BMP in the future.
 ### Clock Digit Sprites
 
 This is a Krita screenshot showing a zoomed in view of the spritesheet I made
-for 7-segment digits. I added sprite number overlays (black text on white
-squares) to show how the sprite numbers work when the spritesheet is loaded as
-a bitmap for use with `displayio.TileGrid` in CircuitPython.
+for 7-segment digits. When the spritesheet is loaded as CircuitPython bitmap
+for `displayio.TileGrid`, the sprite numbers start at `0` for the "0" sprite.
+The "9" sprite is number `9`, the ":" sprite is number `10`, and
+the empty sprite is number `11`.
 
-![annotated Krita screenshot showing a spritesheet](sprites-6x2-screenshot.png)
+![Krita screenshot showing seven-segment digit sprites](digit-font-screenshot.png)
 
-Each sprite is 24 pixels wide by 48 pixels high. The grid divisions in Krita
-are set to show solid grid lines at 24 pixel intervals and dotted grid lines at
-8 pixel subdivisions.
+Each sprite is 32 pixels wide by 48 pixels high. The grid divisions in Krita
+are set to show dotted grid lines at 8 pixel intervals. The solid lines are
+guides that I set to outline each 32x48 pixel sprite.
 
 To get from a Krita document to a BMP spritesheet, I did:
 
