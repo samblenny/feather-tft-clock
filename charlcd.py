@@ -44,7 +44,7 @@ class CharLCD:
         # - top: True: show msg on top line; False: show msg on bottom line
         #
         ASCII_SPACE = const(32)  # first sprite: space (blank rectangle)
-        ASCII_DEL = const(127)   # last sprite: DEL (using this for down arrow)
+        ASCII_DEL = const(127)   # last sprite: DEL (up/down arrows)
         _tg = self.tg0 if top else self.tg1
         _cols = self.cols
 

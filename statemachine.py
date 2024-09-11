@@ -138,9 +138,12 @@ class StateMachine:
         setD = self._setDigits
         setMsg = self.charLCD.setMsg
 
+        # The help message for Set Mode uses a special up/down arrows sprite
+        # that is mapped in the sprite sheet to ASCII DEL (0x7f)
+        SET_HELP = b"\x7f:+/-  B:Exit  A:OK"
+
         # Handle the response code
         # First, check for state transition codes
-        SET_HELP = "^:+ \x7f:- A:ok B:end"
         if r == _Demo:
             self.state = r
             setD(_D1, _D2, _DCol, _D3, _D4)
