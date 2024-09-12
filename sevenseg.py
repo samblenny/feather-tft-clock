@@ -19,7 +19,7 @@ class SevenSeg:
         # Make a Group with TileGrids with top left corner at (x, y)
         tg = TileGrid(
             bmp, pixel_shader=pal, width=cols, height=1,
-            tile_width=32, tile_height=48, x=x, y=y, default_tile=0)
+            tile_width=32, tile_height=48, x=x, y=y, default_tile=11)
         self.tg = tg
         self.cols = cols
         g = Group(scale=1)

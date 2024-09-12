@@ -24,7 +24,8 @@
 # - https://learn.adafruit.com/adafruit-esp32-s3-tft-feather
 # - https://learn.adafruit.com/adafruit-1-14-240x135-color-tft-breakout
 # - https://learn.adafruit.com/adafruit-usb-host-featherwing-with-max3421e
-# - https://learn.adafruit.com/adafruit-adalogger-featherwing
+# - https://learn.adafruit.com/adafruit-adalogger-featherwing/rtc-with-circuitpython
+# - https://docs.circuitpython.org/en/latest/shared-bindings/time/index.html
 #
 from board import D9, D10, D11, I2C, SPI, TFT_CS, TFT_DC
 from digitalio import DigitalInOut, Direction
@@ -33,9 +34,11 @@ from fourwire import FourWire
 import gc
 from max3421e import Max3421E
 from micropython import const
-from time import sleep
+from supervisor import ticks_ms
+from time import sleep, struct_time
 from usb.core import USBError
 
+from adafruit_pcf8523 import PCF8523
 from adafruit_st7789 import ST7789
 from charlcd import CharLCD
 from gamepad import (
@@ -47,7 +50,7 @@ from statemachine import StateMachine
 def handle_input(machine, prev, buttons):
     # Respond to gamepad button state change events
     diff = prev ^  buttons
-    mh = machine.handle
+    mh = machine.handleGamepad
     if (diff & (A | B)) and (buttons == (A | B)):  # A+B pressed
         mh(machine.AB)
     elif (diff & A) and (buttons == A):  # A pressed
@@ -65,6 +68,13 @@ def handle_input(machine, prev, buttons):
     elif (diff & SELECT) and (buttons == SELECT):  # SELECT pressed
         mh(machine.SELECT)
     print(f"{buttons:016b}")
+
+
+def elapsed_ms(prev, now):
+    # Calculate elapsed ms between two timestamps from supervisor.ticks_ms().
+    # The ticks counter rolls over at 2**29, and (2**29)-1 = 0x3fffffff
+    MASK = const(0x3fffffff)
+    return (now - prev) & MASK
 
 
 def main():
@@ -113,10 +123,24 @@ def main():
     usbHost = Max3421E(spi, chip_select=D10, irq=D9)
     sleep(0.1)
 
-    # TODO: Initialize RTC
-
     # Initialize State Machine in clock mode
     machine = StateMachine(digits, charLCD)
+
+    # Initialize RTC
+    rtc = PCF8523.PCF8523(I2C())
+    # to set time:
+    # rtc.datetime = struct_time((year, mon, day, hour, min, sec, 0, -1, -1))
+
+    # Start watching VM millisecond ticks. The point of this is that it should
+    # take fewer clock cycles to check the supervisor ticks than to poll the
+    # RTC over I2C. I2C IO is slow, and constantly banging on the I2C bus might
+    # cause problems. So, use the ticks timer to avoid doing that.
+    prevTicks = ticks_ms()
+
+    # Read RTC time and update display digits
+    RTC_POLL_MS = const(100)
+    prevST = rtc.datetime
+    machine.updateDigits(prevST)
 
     # MAIN EVENT LOOP
     # Establish and maintain a gamepad connection
@@ -125,8 +149,22 @@ def main():
     print("Looking for USB gamepad...")
     charLCD.setMsg(FINDING, top=False)
     display.refresh()
+    _ms = ticks_ms
+    _elapsed = elapsed_ms
+    dirty = False
     while True:
         gc.collect()
+        # Check tick timer to rate limit RTC polling over the I2C bus, then
+        # check RTC timestamps to rate limit display updates on the SPI bus
+        nowTicks = _ms()
+        if dirty or (_elapsed(prevTicks, nowTicks) >= RTC_POLL_MS):
+            prevTicks = nowTicks
+            nowST = rtc.datetime
+            if dirty or (nowST != prevST):
+                prevST = nowST
+                machine.updateDigits(prevST)
+                display.refresh()
+                dirty = False
         try:
             if gp.find_and_configure(retries=25):
                 # Found a gamepad, so configure it and start polling
@@ -136,13 +174,25 @@ def main():
                 charLCD.setMsg(b'gamepad ready', top=False)
                 display.refresh()
                 while connected:
+                    # Check RTC and update clock digits if needed
+                    nowTicks = _ms()
+                    if dirty or ( _elapsed(prevTicks, nowTicks) >= RTC_POLL_MS):
+                        prevTicks = nowTicks
+                        nowST = rtc.datetime
+                        if dirty or (nowST != prevST):
+                            prevST = nowST
+                            machine.updateDigits(prevST)
+                            display.refresh()
+                            dirty = False
+                    gc.collect()
+                    # Check gamepad input
                     (connected, changed, buttons) = gp.poll()
                     if connected and changed:
                         handle_input(machine, prev, buttons)
                         display.refresh()
                         prev = buttons
+                        dirty = True
                     sleep(0.002)
-                    gc.collect()
                 # If loop stopped, gamepad connection was lost
                 print("Gamepad disconnected")
                 print("Looking for USB gamepad...")

@@ -82,18 +82,25 @@ class StateMachine:
         self.charLCD = charLCD
         # Start in the state for Clock Mode with hours and minutes sub-mode
         self.state = _HHMM
-        # TODO: Change this to use the Adalogger FeatherWing RTC chip
-        self.rtcYear = 2024
-        self.rtcMon  = 9
-        self.rtcDay  = 5
-        self.rtcHour = 12
-        self.rtcMin_ = 00
-        self.rtcSec  = 00
-        # Set initial display state
-        self.digits.setDigits(b'12:34')
 
+    def updateDigits(self, st):
+        # Update clock digits from current state and struct_time object, st.
+        # struct_time(tm_year, tm_mon, tm_mday, tm_hour, tm_min, tm_sec,
+        #     tm_wday, tm_yday, tm_isdst)
+        _setD = self.digits.setDigits
+        s = self.state
+        if (s == _HHMM) or (s == _SetMin) or (s == _Demo):
+            _setD('%02d:%02d' % (st.tm_hour, st.tm_min))
+        elif (s == _MMSS) or (s == _SetSec):
+            _setD('%02d:%02d' % (st.tm_min, st.tm_sec))
+        elif (s == _Yr) or (s == _SetYr):
+            _setD(' %04d' % (st.tm_year))
+        elif (s == _Mon) or (s == _SetMon):
+            _setD('   %02d' % (st.tm_mon))
+        elif (s == _Day) or (s == _SetDay):
+            _setD('   %02d' % (st.tm_mday))
 
-    def handle(self, button):
+    def handleGamepad(self, button):
         # Handle a button press event
 
         # Check lookup table for the response code for this button press event
@@ -114,53 +121,42 @@ class StateMachine:
         # First, check for state transition codes
         if r == _Demo:
             self.state = r
-            setD(b'01:23')
             setMsg(b'DEMO MODE 2024-09-10')
             setMsg(b'AaBb~!@#$%^&*()-=_+?', top=False)
         elif r == _HHMM:
             self.state = r
-            setD(b'01:23')
             setMsg(b'')
             setMsg(b'', top=False)
         elif r == _MMSS:
             self.state = r
-            setD(b'23:00')
             setMsg(b'         SECONDS')
         elif r == _Yr:
             self.state = r
-            setD(b' 2024')
             setMsg(b'            YEAR')
         elif r == _Mon:
             self.state = r
-            setD(b'   09')
             setMsg(b'           MONTH')
         elif r == _Day:
             self.state = r
-            setD(b'   10')
             setMsg(b'             DAY')
         elif r == _SetYr:
             self.state = r
-            setD(b' 2024')
             setMsg(b'   SET      YEAR')
             setMsg(SET_HELP, top=False)
         elif r == _SetMon:
             self.state = r
-            setD(b'   09')
             setMsg(b'   SET     MONTH')
             setMsg(SET_HELP, top=False)
         elif r == _SetDay:
             self.state = r
-            setD(b'   10')
             setMsg(b'   SET       DAY')
             setMsg(SET_HELP, top=False)
         elif r == _SetMin:
             self.state = r
-            setD(b'01:23')
             setMsg(b'   SET   MINUTES')
             setMsg(SET_HELP, top=False)
         elif r == _SetSec:
             self.state = r
-            setD(b'23:00')
             setMsg(b'   SET   SECONDS')
             setMsg(SET_HELP, top=False)
 
