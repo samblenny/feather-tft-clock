@@ -123,13 +123,13 @@ def main():
     usbHost = Max3421E(spi, chip_select=D10, irq=D9)
     sleep(0.1)
 
-    # Initialize State Machine in clock mode
-    machine = StateMachine(digits, charLCD)
-
     # Initialize RTC
     rtc = PCF8523.PCF8523(I2C())
     # to set time:
     # rtc.datetime = struct_time((year, mon, day, hour, min, sec, 0, -1, -1))
+
+    # Initialize State Machine
+    machine = StateMachine(digits, charLCD, rtc)
 
     # Start watching VM millisecond ticks. The point of this is that it should
     # take fewer clock cycles to check the supervisor ticks than to poll the

@@ -17,7 +17,15 @@
 # | setMin  | min+1  | min-1  | nop  | nop   | setSec  | hhmm | demo | hhmm    |
 # | setSec  | sec=0  | sec=0  | nop  | nop   | setYear | hhmm | demo | hhmm    |
 #
+# Related documentation:
+# - https://docs.circuitpython.org/projects/datetime/en/latest/api.html
+# - https://docs.circuitpython.org/en/latest/shared-bindings/time/index.html#time.mktime
+#
 from micropython import const
+from time import mktime
+
+from adafruit_datetime import datetime, timedelta
+
 
 # State Transition Constants (private)
 # CAUTION: These values must match row indexes of StateMachine.TABLE
@@ -76,10 +84,11 @@ class StateMachine:
         (_Sec00,  _Sec00,  _NOP,  _NOP,  _SetYr,  _HHMM, _Demo, _HHMM  ),  # setSec
     )
 
-    def __init__(self, digits, charLCD):
-        # Save references to the collections of sprite TileGrid objects
+    def __init__(self, digits, charLCD, rtc):
+        # Save references to character LCD display, digits display, and RTC
         self.digits = digits
         self.charLCD = charLCD
+        self.rtc = rtc
         # Start in the state for Clock Mode with hours and minutes sub-mode
         self.state = _HHMM
 
@@ -164,20 +173,26 @@ class StateMachine:
         elif r == _NOP:
             return
         elif r == _YrInc:
-            pass          # TODO: IMPLEMENT THIS
+            now = datetime.fromtimestamp(mktime(self.rtc.datetime))
+            self.rtc.datetime = (now + timedelta(days=365)).timetuple()
         elif r == _YrDec:
-            pass          # TODO: IMPLEMENT THIS
+            now = datetime.fromtimestamp(mktime(self.rtc.datetime))
+            self.rtc.datetime = (now + timedelta(days=-365)).timetuple()
         elif r == _MonInc:
             pass          # TODO: IMPLEMENT THIS
         elif r == _MonDec:
             pass          # TODO: IMPLEMENT THIS
         elif r == _DayInc:
-            pass          # TODO: IMPLEMENT THIS
+            now = datetime.fromtimestamp(mktime(self.rtc.datetime))
+            self.rtc.datetime = (now + timedelta(days=1)).timetuple()
         elif r == _DayDec:
-            pass          # TODO: IMPLEMENT THIS
+            now = datetime.fromtimestamp(mktime(self.rtc.datetime))
+            self.rtc.datetime = (now + timedelta(days=-1)).timetuple()
         elif r == _MinInc:
-            pass          # TODO: IMPLEMENT THIS
+            now = datetime.fromtimestamp(mktime(self.rtc.datetime))
+            self.rtc.datetime = (now + timedelta(minutes=1)).timetuple()
         elif r == _MinDec:
-            pass          # TODO: IMPLEMENT THIS
+            now = datetime.fromtimestamp(mktime(self.rtc.datetime))
+            self.rtc.datetime = (now + timedelta(minutes=-1)).timetuple()
         elif r == _Sec00:
             pass          # TODO: IMPLEMENT THIS
