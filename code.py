@@ -51,9 +51,7 @@ def handle_input(machine, prev, buttons):
     # Respond to gamepad button state change events
     diff = prev ^  buttons
     mh = machine.handleGamepad
-    if (diff & (A | B)) and (buttons == (A | B)):  # A+B pressed
-        mh(machine.AB)
-    elif (diff & A) and (buttons == A):  # A pressed
+    if (diff & A) and (buttons == A):  # A pressed
         mh(machine.A)
     elif (diff & B) and (buttons == B):  # B pressed
         mh(machine.B)

@@ -74,33 +74,27 @@ The clock's state machine is moderately complicated. So, I used a spreadsheet
 to make a table of all the states along with actions and state transitions that
 should happen for USB gamepad button presses:
 
-| State   | UP     | DOWN   | LEFT | RIGHT | A       | B    | A+B  | SELECT  |
-| ------- | ------ | ------ | ---- | ----- | ------- | ---- | ---- | ------- |
-| demo    | hhmm   | hhmm   | hhmm | hhmm  | hhmm    | hhmm | demo | hhmm    |
-| hhmm    | nop    | nop    | day  | mmss  | nop     | hhmm | demo | setMin  |
-| mmss    | nop    | nop    | hhmm | year  | nop     | hhmm | demo | setSec  |
-| year    | nop    | nop    | mmss | mon   | nop     | hhmm | demo | setYear |
-| mon     | nop    | nop    | year | day   | nop     | hhmm | demo | setYear |
-| day     | nop    | nop    | mon  | hhmm  | nop     | hhmm | demo | setYear |
-| setYear | year+1 | year-1 | nop  | nop   | setMon  | hhmm | demo | hhmm    |
-| setMon  | mon+1  | mon-1  | nop  | nop   | setDay  | hhmm | demo | hhmm    |
-| setDay  | day+1  | day-1  | nop  | nop   | setMin  | hhmm | demo | hhmm    |
-| setMin  | min+1  | min-1  | nop  | nop   | setSec  | hhmm | demo | hhmm    |
-| setSec  | sec=0  | sec=0  | nop  | nop   | setYear | hhmm | demo | hhmm    |
+| State   | UP     | DOWN   | LEFT | RIGHT | A       | B    | SELECT  |
+| ------- | ------ | ------ | ---- | ----- | ------- | ---- | ------- |
+| hhmm    | nop    | nop    | day  | mmss  | nop     | hhmm | setMin  |
+| mmss    | nop    | nop    | hhmm | year  | nop     | hhmm | setSec  |
+| year    | nop    | nop    | mmss | mon   | nop     | hhmm | setYear |
+| mDay    | nop    | nop    | year | hhmm  | nop     | hhmm | setYear |
+| setYear | year+1 | year-1 | nop  | nop   | setMDay | hhmm | hhmm    |
+| setMDay | day+1  | day-1  | nop  | nop   | setMin  | hhmm | hhmm    |
+| setMin  | min+1  | min-1  | nop  | nop   | setSec  | hhmm | hhmm    |
+| setSec  | sec=0  | sec=0  | nop  | nop   | setYear | hhmm | hhmm    |
 
 
 ### Major Modes and Sub-modes
 
-The state machine has 3 major modes:
+The state machine has 2 major modes:
 
-1) **Demo Mode** shows a demo screen that makes it easy to take a photo of how
-   all the sprites look on the LCD.
-
-2) **Clock Mode** shows the current time or date. Since the numeric display
+1) **Clock Mode** shows the current time or date. Since the numeric display
    only has 4 digits, there are sub-modes to show hours and minutes (hhmm),
-   minutes and seconds (mmss), year, month (mon), or day.
+   minutes and seconds (mmss), year, and month and day.
 
-3) **Set Mode** lets you set the clock's year, month, day, hour, minutes, and
+2) **Set Mode** lets you set the clock's year, month, day, hour, minutes, and
    seconds. Set Mode has the same sub-modes as Clock Mode.
 
 
@@ -122,7 +116,6 @@ order: year, month (mon), day, minutes (hhmm), seconds (mmss).
 Clock Mode (all sub-modes):
 - **LEFT** or **RIGHT**: rotate through the sub-modes
 - **B**: Switch back to the hours and minutes sub-mode (hhmm)
-- **A+B**: Switch to Demo Mode
 - **SELECT**: Switch to Set Mode
 
 Set Mode (sub-modes: year, month, day, and minutes (hhmm)):
