@@ -14,14 +14,7 @@ The display in this photo is real, not a simulation.
 ## Sprites and Krita
 
 To make the sprites in Krita for 7-segment digits and ASCII characters, I used
-the "Pixel Art" brush preset with a custom palette swatch that I defined on my
-own. Krita doesn't provide a way to get detailed control over how indexed color
-palettes are saved when you export to PNG files. But, in practice, that doesn't
-matter much. If you use the Pixel Art brush to paint with a small number of
-colors, then export to PNG, the resulting files use indexed colors.
-
-As of CircuitPython 9.1.3, BMP files still work better than PNG for
-spritesheets. But, PNG support may catch up to BMP in the future.
+the "Pixel Art" brush preset with a custom palette swatch.
 
 
 ### Clock Digit Sprites
@@ -29,14 +22,18 @@ spritesheets. But, PNG support may catch up to BMP in the future.
 This is a Krita screenshot showing a zoomed in view of the spritesheet I made
 for 7-segment digits. When the spritesheet is loaded as CircuitPython bitmap
 for `displayio.TileGrid`, the sprite numbers start at `0` for the "0" sprite.
-The "9" sprite is number `9`, the ":" sprite is number `10`, and
-the empty sprite is number `11`.
+The "9" sprite is number `9`, the ":" sprite is `10`, the "-" sprite is `11`,
+and the empty sprite is `12`.
 
 ![Krita screenshot showing seven-segment digit sprites](digit-font-screenshot.png)
 
-Each sprite is 32 pixels wide by 48 pixels high. The grid divisions in Krita
-are set to show dotted grid lines at 8 pixel intervals. The solid lines are
-guides that I set to outline each 32x48 pixel sprite.
+Each sprite is 30 pixels wide by 50 pixels high. The top pixel of each sprite
+is blank to work around a bug that currently affects bitmaps loaded from PNG
+files with adafruit_imageloader. By the time you read this, the bug may have
+been fixed (see https://github.com/adafruit/circuitpython/issues/9587).
+
+The solid grid lines between sprites are Krita guides. The dotted lines are
+grid divisions (for details, refer to the Grid options tab in the screenshot).
 
 To get from a Krita document to a BMP spritesheet, I did:
 
@@ -74,60 +71,48 @@ The clock's state machine is moderately complicated. So, I used a spreadsheet
 to make a table of all the states along with actions and state transitions that
 should happen for USB gamepad button presses:
 
-| State   | UP     | DOWN   | LEFT | RIGHT | A       | B    | SELECT  |
-| ------- | ------ | ------ | ---- | ----- | ------- | ---- | ------- |
-| hhmm    | nop    | nop    | day  | mmss  | nop     | hhmm | setMin  |
-| mmss    | nop    | nop    | hhmm | year  | nop     | hhmm | setSec  |
-| year    | nop    | nop    | mmss | mon   | nop     | hhmm | setYear |
-| mDay    | nop    | nop    | year | hhmm  | nop     | hhmm | setYear |
-| setYear | year+1 | year-1 | nop  | nop   | setMDay | hhmm | hhmm    |
-| setMDay | day+1  | day-1  | nop  | nop   | setMin  | hhmm | hhmm    |
-| setMin  | min+1  | min-1  | nop  | nop   | setSec  | hhmm | hhmm    |
-| setSec  | sec=0  | sec=0  | nop  | nop   | setYear | hhmm | hhmm    |
+| State   | UP     | DOWN   | LEFT    | RIGHT   | A       | B    | START   |
+| ------- | ------ | ------ | ------- | ------- | ------- | ---- | ------- |
+| hhmm    | nop    | nop    | mmss    | mmss    | nop     | hhmm | setHMin |
+| mmss    | nop    | nop    | hhmm    | hhmm    | nop     | hhmm | setHMin |
+| setYr   | year+1 | year-1 | setSec  | setMDay | setMDay | hhmm | hhmm    |
+| setMDay | day+1  | day-1  | setYr   | setHMin | setHMin | hhmm | hhmm    |
+| setHMin | min+1  | min-1  | setMDay | setSec  | setSec  | hhmm | hhmm    |
+| setSec  | sec=0  | sec=0  | setHMin | setYr   | setYr   | hhmm | hhmm    |
 
 
 ### Major Modes and Sub-modes
 
 The state machine has 2 major modes:
 
-1) **Clock Mode** shows the current time or date. Since the numeric display
-   only has 4 digits, there are sub-modes to show hours and minutes (hhmm),
-   minutes and seconds (mmss), year, and month and day.
+1) **Clock Mode** shows the current time or date. There are sub-modes for a
+   minimal hour and minute (hhmm) display along with a fancier display with
+   full date and time including seconds (mmss).
 
 2) **Set Mode** lets you set the clock's year, month, day, hour, minutes, and
-   seconds. Set Mode has the same sub-modes as Clock Mode.
-
-
-### Order of Sub-modes
-
-In Clock Mode, the order of moving between sub-modes doesn't matter.
-
-In Set Mode, the order of sub-modes matters because calendar dates are tricky.
-
-For code to look up the number of days in a month, it must know which month of
-which year. When you use Set Mode, its code checks the numbers you enter to be
-sure they represent a valid calendar date that actually exists. To make that
-checking possible, the code requires you to move through sub-modes in the
-order: year, month (mon), day, minutes (hhmm), seconds (mmss).
+   seconds. Set Mode has submodes for setting the year (setYr), the month and
+   day (setMDay), the hours and minutes (setHMin), and seconds (setSec).
 
 
 ### Button Actions
 
 Clock Mode (all sub-modes):
-- **LEFT** or **RIGHT**: rotate through the sub-modes
+- **LEFT** or **RIGHT**: switch between sub-modes
 - **B**: Switch back to the hours and minutes sub-mode (hhmm)
-- **SELECT**: Switch to Set Mode
+- **START**: Switch to Set Mode
 
-Set Mode (sub-modes: year, month, day, and minutes (hhmm)):
+Set Mode (sub-modes: year, month-day, hours-minutes):
 - **UP**: Add 1 to the value being set
 - **DOWN**: Subtract 1 from the value being set
-- **A**: Advance to the next sub-mode
-- **B** or **SELECT**: Switch back to Clock Mode
+- **A** or **RIGHT**: Advance to the next sub-mode
+- **LEFT**: Switch to the previous sub-mode
+- **B** or **START**: Switch back to Clock Mode
 
-Set Mode (sub-mode: seconds (mmss)):
+Set Mode (sub-mode: seconds):
 - **UP** or **DOWN**: Set seconds to 00, rounding minutes to closest minute
-- **A**: Advance to the next sub-mode
-- **B** or **SELECT**: Switch back to Clock Mode
+- **A** or **RIGHT*: Advance to the next sub-mode
+- **LEFT**: Switch to the previous sub-mode
+- **B** or **START**: Switch back to Clock Mode
 
 
 ## Hardware

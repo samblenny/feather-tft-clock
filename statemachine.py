@@ -3,16 +3,14 @@
 #
 # Table of states and state transitions:
 #
-# | State   | UP     | DOWN   | LEFT | RIGHT | A       | B    | SELECT  |
-# | ------- | ------ | ------ | ---- | ----- | ------- | ---- | ------- |
-# | hhmm    | nop    | nop    | day  | mmss  | nop     | hhmm | setMin  |
-# | mmss    | nop    | nop    | hhmm | year  | nop     | hhmm | setSec  |
-# | year    | nop    | nop    | mmss | mon   | nop     | hhmm | setYear |
-# | mDay    | nop    | nop    | year | hhmm  | nop     | hhmm | setYear |
-# | setYear | year+1 | year-1 | nop  | nop   | setMDay | hhmm | hhmm    |
-# | setMDay | day+1  | day-1  | nop  | nop   | setMin  | hhmm | hhmm    |
-# | setMin  | min+1  | min-1  | nop  | nop   | setSec  | hhmm | hhmm    |
-# | setSec  | sec=0  | sec=0  | nop  | nop   | setYear | hhmm | hhmm    |
+# | State   | UP     | DOWN   | LEFT    | RIGHT   | A       | B    | START   |
+# | ------- | ------ | ------ | ------- | ------- | ------- | ---- | ------- |
+# | hhmm    | nop    | nop    | mmss    | mmss    | nop     | hhmm | setHMin |
+# | mmss    | nop    | nop    | hhmm    | hhmm    | nop     | hhmm | setHMin |
+# | setYr   | year+1 | year-1 | setSec  | setMDay | setMDay | hhmm | hhmm    |
+# | setMDay | day+1  | day-1  | setYr   | setHMin | setHMin | hhmm | hhmm    |
+# | setHMin | min+1  | min-1  | setMDay | setSec  | setSec  | hhmm | hhmm    |
+# | setSec  | sec=0  | sec=0  | setHMin | setYr   | setYr   | hhmm | hhmm    |
 #
 # Related documentation:
 # - https://docs.circuitpython.org/projects/datetime/en/latest/api.html
@@ -28,48 +26,45 @@ from adafruit_datetime import datetime, timedelta
 # CAUTION: These values must match row indexes of StateMachine.TABLE
 _HHMM    = const(0)
 _MMSS    = const(1)
-_Yr      = const(2)
-_MDay    = const(3)
-_SetYr   = const(4)
-_SetMDay = const(5)
-_SetMin  = const(6)
-_SetSec  = const(7)
+_SetYr   = const(2)
+_SetMDay = const(3)
+_setHMin = const(4)
+_SetSec  = const(5)
 
 # Action Constants (private)
-_NOP    = const(8)
-_YrInc  = const(9)
-_YrDec  = const(10)
-_DayInc = const(11)
-_DayDec = const(12)
-_MinInc = const(13)
-_MinDec = const(14)
-_Sec00  = const(15)
+_NOP    = const(6)
+_YrInc  = const(7)
+_YrDec  = const(8)
+_DayInc = const(9)
+_DayDec = const(10)
+_MinInc = const(11)
+_MinDec = const(12)
+_Sec00  = const(13)
 
 
 class StateMachine:
 
     # Button Press Constants (public)
     # CAUTION: These values must match column indexes of StateMachine.TABLE
-    UP     = const(0)
-    DOWN   = const(1)
-    LEFT   = const(2)
-    RIGHT  = const(3)
-    A      = const(4)
-    B      = const(5)
-    SELECT = const(6)
+    UP    = const(0)
+    DOWN  = const(1)
+    LEFT  = const(2)
+    RIGHT = const(3)
+    A     = const(4)
+    B     = const(5)
+    START = const(6)
 
     # LookUp Table (private) of actions (including NOP and state transitions)
-    # for possible button press events in each of the possible states
+    # for possible button press events in each of the possible states. NOP is
+    # short for "No OPeration", and it means to do nothing.
     _TABLE = (
-        # UP      DOWN     LEFT   RIGHT  A         B      SELECT     State
-        (_NOP,    _NOP,    _MDay, _MMSS, _NOP,     _HHMM, _SetMin),  # hhmm
-        (_NOP,    _NOP,    _HHMM, _Yr,   _NOP,     _HHMM, _SetSec),  # mmss
-        (_NOP,    _NOP,    _MMSS, _MDay, _NOP,     _HHMM, _SetYr ),  # year
-        (_NOP,    _NOP,    _Yr,   _HHMM, _NOP,     _HHMM, _SetYr ),  # mDay
-        (_YrInc,  _YrDec,  _NOP,  _NOP,  _SetMDay, _HHMM, _HHMM  ),  # setYr
-        (_DayInc, _DayDec, _NOP,  _NOP,  _SetMin,  _HHMM, _HHMM  ),  # setMDay
-        (_MinInc, _MinDec, _NOP,  _NOP,  _SetSec,  _HHMM, _HHMM  ),  # setMin
-        (_Sec00,  _Sec00,  _NOP,  _NOP,  _SetYr,   _HHMM, _HHMM  ),  # setSec
+        # UP      DOWN     LEFT      RIGHT     A         B      START       State
+        (_NOP,    _NOP,    _MMSS,    _MMSS,    _NOP,     _HHMM, _setHMin),  # hhmm
+        (_NOP,    _NOP,    _HHMM,    _HHMM,    _NOP,     _HHMM, _setHMin),  # mmss
+        (_YrInc,  _YrDec,  _SetSec,  _SetMDay, _SetMDay, _HHMM, _HHMM   ),  # setYr
+        (_DayInc, _DayDec, _SetYr,   _setHMin, _setHMin, _HHMM, _HHMM   ),  # setMDay
+        (_MinInc, _MinDec, _SetMDay, _SetSec,  _SetSec,  _HHMM, _HHMM   ),  # setHMin
+        (_Sec00,  _Sec00,  _setHMin,  _SetYr,  _SetYr,   _HHMM, _HHMM   ),  # setSec
     )
 
     def __init__(self, digits, charLCD, rtc):
@@ -85,89 +80,104 @@ class StateMachine:
         # struct_time(tm_year, tm_mon, tm_mday, tm_hour, tm_min, tm_sec,
         #     tm_wday, tm_yday, tm_isdst)
         _setD = self.digits.setDigits
+        _setM = self.charLCD.setMsg
         s = self.state
-        if (s == _HHMM) or (s == _SetMin):
-            _setD('%02d:%02d' % (st.tm_hour, st.tm_min))
-        elif (s == _MMSS) or (s == _SetSec):
-            _setD('%02d:%02d' % (st.tm_min, st.tm_sec))
-        elif (s == _Yr) or (s == _SetYr):
-            _setD(' %04d' % (st.tm_year))
-        elif (s == _MDay) or (s == _SetMDay):
-            _setD('%02d %02d' % (st.tm_mon, st.tm_mday))
+        if (s == _HHMM):
+            # Simple clock like, "12:00"
+            _setD('  %02d:%02d' % (st.tm_hour, st.tm_min))
+        elif (s == _MMSS):
+            # Full date and time like, "2024-09-12 12:00:01"
+            _setM('%04d-%02d-%02d' % (st.tm_year, st.tm_mon, st.tm_mday))
+            _setD('%02d:%02d:%02d' % (st.tm_hour, st.tm_min, st.tm_sec))
+        elif (s == _setHMin) or (s == _SetSec):
+            # for setting hours, minutes, or seconds like, "12:00:01"
+            _setD('%02d:%02d:%02d' % (st.tm_hour, st.tm_min, st.tm_sec))
+        elif (s == _SetYr):
+            # for setting the year
+            _setD('   %04d' % (st.tm_year))
+        elif (s == _SetMDay):
+            # for setting the month and day
+            _setD('  %02d-%02d' % (st.tm_mon, st.tm_mday))
 
     def handleGamepad(self, button):
         # Handle a button press event
 
         # Check lookup table for the response code for this button press event
-        if button < UP or button > SELECT:
+        if button < UP or button > START:
             print("Button value out of range:", button)
             return
         r = self._TABLE[self.state][button]
 
-        # Cache frequently used functions
-        setD = self.digits.setDigits
-        setMsg = self.charLCD.setMsg
+        # Cache frequently used names to reduce time used by dictionary lookups
+        _rtc = self.rtc
+        _setM = self.charLCD.setMsg
+        _fromtimestamp = datetime.fromtimestamp
 
         # The help message for Set Mode uses a special up/down arrows sprite
         # that is mapped in the sprite sheet to ASCII DEL (0x7f)
-        SET_HELP = b"\x7f:+/-  B:Exit  A:OK"
+        SET_HELP     = b"\x7f:+/-  B:Exit  A:OK"
+        SET_HELP_SEC = b"\x7f:=00  B:Exit  A:OK"
 
         # Handle the response code
         # First, check for state transition codes
         if r == _HHMM:
             self.state = r
-            setMsg(b'')
-            setMsg(b'', top=False)
+            _setM(b'')
+            _setM(b'', top=False)
         elif r == _MMSS:
             self.state = r
-            setMsg(b'         SECONDS')
-        elif r == _Yr:
-            self.state = r
-            setMsg(b'            YEAR')
-        elif r == _MDay:
-            self.state = r
-            setMsg(b'       MONTH DAY')
+            _setM(b'')
+            _setM(b'', top=False)
         elif r == _SetYr:
             self.state = r
-            setMsg(b'   SET      YEAR')
-            setMsg(SET_HELP, top=False)
+            _setM(b'   SET       YEAR')
+            _setM(SET_HELP, top=False)
         elif r == _SetMDay:
             self.state = r
-            setMsg(b'   SET MONTH DAY')
-            setMsg(SET_HELP, top=False)
-        elif r == _SetMin:
+            _setM(b'   SET  MONTH-DAY')
+            _setM(SET_HELP, top=False)
+        elif r == _setHMin:
             self.state = r
-            setMsg(b'   SET   MINUTES')
-            setMsg(SET_HELP, top=False)
+            _setM(b'   SET    MINUTES')
+            _setM(SET_HELP, top=False)
         elif r == _SetSec:
             self.state = r
-            setMsg(b'   SET   SECONDS')
-            setMsg(SET_HELP, top=False)
+            _setM(b'   SET    SECONDS')
+            _setM(SET_HELP_SEC, top=False)
 
         # Second, check for action codes that don't change the state
         elif r == _NOP:
             return
+
+        # Third, check for action codes that modify the RTC date or time
         elif r == _YrInc:
-            now = datetime.fromtimestamp(mktime(self.rtc.datetime))
-            self.rtc.datetime = (now + timedelta(days=365)).timetuple()
+            # Increment Year
+            now = _fromtimestamp(mktime(_rtc.datetime))
+            _rtc.datetime = (now + timedelta(days=365)).timetuple()
         elif r == _YrDec:
-            now = datetime.fromtimestamp(mktime(self.rtc.datetime))
-            self.rtc.datetime = (now + timedelta(days=-365)).timetuple()
+            # Decrement Year
+            now = _fromtimestamp(mktime(_rtc.datetime))
+            _rtc.datetime = (now + timedelta(days=-365)).timetuple()
         elif r == _DayInc:
-            now = datetime.fromtimestamp(mktime(self.rtc.datetime))
-            self.rtc.datetime = (now + timedelta(days=1)).timetuple()
+            # Increment Day
+            now = _fromtimestamp(mktime(_rtc.datetime))
+            _rtc.datetime = (now + timedelta(days=1)).timetuple()
         elif r == _DayDec:
-            now = datetime.fromtimestamp(mktime(self.rtc.datetime))
-            self.rtc.datetime = (now + timedelta(days=-1)).timetuple()
+            # Decrement Day
+            now = _fromtimestamp(mktime(_rtc.datetime))
+            _rtc.datetime = (now + timedelta(days=-1)).timetuple()
         elif r == _MinInc:
-            now = datetime.fromtimestamp(mktime(self.rtc.datetime))
-            self.rtc.datetime = (now + timedelta(minutes=1)).timetuple()
+            # Increment Minute
+            now = _fromtimestamp(mktime(_rtc.datetime))
+            _rtc.datetime = (now + timedelta(minutes=1)).timetuple()
         elif r == _MinDec:
-            now = datetime.fromtimestamp(mktime(self.rtc.datetime))
-            self.rtc.datetime = (now + timedelta(minutes=-1)).timetuple()
+            # Decrement Minute
+            now = _fromtimestamp(mktime(_rtc.datetime))
+            _rtc.datetime = (now + timedelta(minutes=-1)).timetuple()
         elif r == _Sec00:
-            nowST = self.rtc.datetime
-            now = datetime.fromtimestamp(mktime(nowST))
+            # Round seconds to nearest minute
+            nowST = _rtc.datetime
+            now = _fromtimestamp(mktime(nowST))
             sec = nowST.tm_sec
             delta = -(sec) if (sec <= 30) else (60-sec)
-            self.rtc.datetime = (now + timedelta(seconds=delta)).timetuple()
+            _rtc.datetime = (now + timedelta(seconds=delta)).timetuple()

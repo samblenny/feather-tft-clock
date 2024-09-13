@@ -63,8 +63,8 @@ def handle_input(machine, prev, buttons):
         mh(machine.LEFT)
     elif (diff & RIGHT) and (buttons == RIGHT):  # RIGHT pressed
         mh(machine.RIGHT)
-    elif (diff & SELECT) and (buttons == SELECT):  # SELECT pressed
-        mh(machine.SELECT)
+    elif (diff & START) and (buttons == START):  # START pressed
+        mh(machine.START)
     print(f"{buttons:016b}")
 
 
@@ -100,11 +100,12 @@ def main():
     gc.collect()
 
     # Configure the 7-segment clock digits display area in the center of the
-    # screen. There are five 7-segment sprites, and each sprite is 32px wide by
-    # 48px high.
-    X = (TFT_W - (5 * 32)) // 2
-    Y = (TFT_H - 48) // 2
+    # screen. There are eight 7-segment sprites, and each sprite is 30px wide by
+    # 50px high.
+    X = (TFT_W - (8 * 30)) // 2
+    Y = (TFT_H - 50) // 2
     digits = SevenSeg(x=X, y=Y)
+    gc.collect()
 
     # Add the TileGrids to the display's root group
     gc.collect()
@@ -118,11 +119,14 @@ def main():
     # The link between usb.core and Max3421E happens by way of invisible
     # magic in the CircuitPython core, kinda like with displayio displays.
     print("Initializing USB host port...")
+    gc.collect()
     usbHost = Max3421E(spi, chip_select=D10, irq=D9)
+    gc.collect()
     sleep(0.1)
 
     # Initialize RTC
     rtc = PCF8523.PCF8523(I2C())
+    gc.collect()
     # to set time:
     # rtc.datetime = struct_time((year, mon, day, hour, min, sec, 0, -1, -1))
 

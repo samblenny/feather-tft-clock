@@ -2,7 +2,9 @@
 # SPDX-FileCopyrightText: Copyright 2024 Sam Blenny
 #
 from displayio import Bitmap, Group, Palette, TileGrid
+import gc
 from micropython import const
+
 import adafruit_imageload
 
 
@@ -18,16 +20,20 @@ class CharLCD:
         # - scale: scaling factor for the font (scale=2 means 2x zoom)
         self.cols = cols
         # Load font spritesheet into Bitmap and Palette objects
+        gc.collect()
         (bmp, pal) = adafruit_imageload.load(
             "ASCII-font.bmp", bitmap=Bitmap, palette=Palette)
+        gc.collect()
         # Make a Group with TileGrids for the top line, with top left corner at
         # (x0, y0), and the bottom line, with top left corner at (x1, y1)
         tg0 = TileGrid(
             bmp, pixel_shader=pal, width=cols, height=1,
             tile_width=6, tile_height=8, x=x, y=y0, default_tile=0)
+        gc.collect()
         tg1 = TileGrid(
             bmp, pixel_shader=pal, width=cols, height=1,
             tile_width=6, tile_height=8, x=x, y=y1, default_tile=0)
+        gc.collect()
         self.tg0 = tg0
         self.tg1 = tg1
         g = Group(scale=scale)
