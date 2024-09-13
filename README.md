@@ -35,17 +35,6 @@ been fixed (see https://github.com/adafruit/circuitpython/issues/9587).
 The solid grid lines between sprites are Krita guides. The dotted lines are
 grid divisions (for details, refer to the Grid options tab in the screenshot).
 
-To get from a Krita document to a BMP spritesheet, I did:
-
-1. In Krita: File menu > Export... > (export PNG file: digit-sprites.png)
-
-2. In Debian terminal shell:
-   `gm convert digit-sprites.png BMP3:digit-sprites.bmp`
-
-The `gm convert` shell command requires that you have the Debian GraphicsMagick
-package installed (`sudo apt install graphicsmagick`). ImageMagick would also
-work.
-
 
 ## ASCII Character Sprites
 
@@ -63,6 +52,17 @@ character. The last sprite number is 95, which corresponds to ASCII DEL
 character (127), which I used for a custom up/down arrows glyph. To translate
 from a Python string or byte to the sprite number, you subtract 32 from the
 character's ordinal number (`ord()`) or the byte's integer value.
+
+To get from a Krita document to a BMP spritesheet, I did:
+
+1. In Krita: File menu > Export... > (export PNG file: ASCII-font.png)
+
+2. In Debian terminal shell:
+   `gm convert ASCII-font.png BMP3:ASCII-font.bmp`
+
+The `gm convert` shell command requires that you have the Debian GraphicsMagick
+package installed (`sudo apt install graphicsmagick`). ImageMagick would also
+work.
 
 
 ## State Machine
