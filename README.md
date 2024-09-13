@@ -90,8 +90,8 @@ The state machine has 2 major modes:
    full date and time including seconds (mmss).
 
 2) **Set Mode** lets you set the clock's year, month, day, hour, minutes, and
-   seconds. Set Mode has submodes for setting the year (setYr), the month and
-   day (setMDay), the hours and minutes (setHMin), and seconds (setSec).
+   seconds. Set Mode has sub-modes for setting the year (setYr), the month and
+   day (setMDay), hours and minutes (setHMin), and seconds (setSec).
 
 
 ### Button Actions
@@ -110,7 +110,7 @@ Set Mode (sub-modes: year, month-day, hours-minutes):
 
 Set Mode (sub-mode: seconds):
 - **UP** or **DOWN**: Set seconds to 00, rounding minutes to closest minute
-- **A** or **RIGHT*: Advance to the next sub-mode
+- **A** or **RIGHT**: Advance to the next sub-mode
 - **LEFT**: Switch to the previous sub-mode
 - **B** or **START**: Switch back to Clock Mode
 
