@@ -4,11 +4,12 @@
 
 **WORK IN PROGRESS (ALPHA)**
 
-This clock's display uses TileGrid sprites that I made in Krita. The code shows
-how to set time a date using a state machine with USB gamepad button inputs.
-The display in this photo is real, not a simulation.
+This clock project demonstrates how to build a USB gamepad controlled user
+interface with sprites. The display uses TileGrid sprites that I made in Krita.
+The code shows how to use a state machine to model the behavior of a clock.
+This photo shows my clock code running on an Adafruit Feather TFT:
 
-![photo of assembled hardware showing sprite demo on Feather TFT display](feather-tft-clock.jpeg)
+![photo of clock code running on a Feather TFT board with Adalogger and USB Host boards](feather-tft-clock.jpeg)
 
 
 ## Sprites and Krita
