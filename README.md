@@ -86,8 +86,8 @@ should happen for USB gamepad button presses:
 The state machine has 2 major modes:
 
 1) **Clock Mode** shows the current time or date. There are sub-modes for a
-   minimal hour and minute (hhmm) display along with a fancier display with
-   full date and time including seconds (mmss).
+   minimal hour and minute display (hhmm) and a fancier display with full date
+   and time including seconds (mmss).
 
 2) **Set Mode** lets you set the clock's year, month, day, hour, minutes, and
    seconds. Set Mode has sub-modes for setting the year (setYr), the month and
