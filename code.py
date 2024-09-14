@@ -149,16 +149,21 @@ def main():
     prev_ms = _ms()
 
     # Read RTC time and update display digits
-    RTC_POLL_MS = const(100)
+    RTC_MS = const(100)
     prevST = rtc.datetime
     _updateDigits(prevST)
+
+    # Gamepad status update strings
+    GP_FIND   = 'Finding USB gamepad'
+    GP_READY  = 'gamepad ready'
+    GP_DISCON = 'gamepad disconnected'
+    GP_ERR    = 'gamepad connection error'
 
     # MAIN EVENT LOOP
     # Establish and maintain a gamepad connection
     gp = XInputGamepad()
-    FINDING_GP = 'Finding USB gamepad'
-    print(FINDING_GP)
-    _setMsg(FINDING_GP, top=False)
+    print(GP_FIND)
+    _setMsg(GP_FIND, top=False)
     _refresh()
     dirty = False
     # Outer Loop: Update clock and try to connect to a USB gamepad.
@@ -168,7 +173,7 @@ def main():
     while True:
         _collect()
         now_ms = _ms()
-        if dirty or (_elapsed(prev_ms, now_ms) >= RTC_POLL_MS):
+        if dirty or (_elapsed(prev_ms, now_ms) >= RTC_MS):
             # Check clock (RTC) and update time display if needed
             prev_ms = now_ms
             nowST = rtc.datetime
@@ -182,14 +187,14 @@ def main():
             if gp.find_and_configure():
                 print(gp.device_info_str())
                 connected = True
-                _setMsg(b'gamepad ready', top=False)
+                _setMsg(GP_READY, top=False)
                 _refresh()
                 # Inner Loop: Update clock and poll gamepad for button events
                 prev_btn = 0
                 for buttons in gp.poll():
                     now_ms = _ms()
                     # Check RTC and update clock digits if needed
-                    if dirty or ( _elapsed(prev_ms, now_ms) >= RTC_POLL_MS):
+                    if dirty or ( _elapsed(prev_ms, now_ms) >= RTC_MS):
                         prev_ms = now_ms
                         nowST = rtc.datetime
                         if dirty or (nowST != prevST):
@@ -206,9 +211,9 @@ def main():
                         dirty = True
                     sleep(0.002)
                 # If loop stopped, gamepad connection was lost
-                print("Gamepad disconnected")
-                print(FINDING_GP)
-                _setMsg(FINDING_GP, top=False)
+                print(GP_DISCON)
+                print(GP_FIND)
+                _setMsg(GP_FIND, top=False)
                 _refresh()
             else:
                 # No connection yet, so sleep briefly then try again
@@ -218,9 +223,9 @@ def main():
             # low-level USB thing happened which this driver does not yet
             # know how to deal with. So, log the error and keep going
             print(e)
-            print("Gamepad connection error")
-            print(FINDING_GP)
-            _setMsg(FINDING_GP, top=False)
+            print(GP_ERR)
+            print(GP_FIND)
+            _setMsg(GP_FIND, top=False)
             _refresh()
 
 
