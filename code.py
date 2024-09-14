@@ -193,7 +193,7 @@ def main():
                 prev_btn = 0
                 for buttons in gp.poll():
                     now_ms = _ms()
-                    # Check RTC and update clock digits if needed
+                    # Check RTC and update display if needed
                     if dirty or ( _elapsed(prev_ms, now_ms) >= RTC_MS):
                         prev_ms = now_ms
                         nowST = rtc.datetime
@@ -201,15 +201,14 @@ def main():
                             prevST = nowST
                             _updateDigits(prevST)
                             _refresh()
+                            _collect()
                             dirty = False
-                    _collect()
                     # Handle gamepad input events
+                    sleep(0.002)
                     if prev_btn != buttons:
                         handle_input(machine, prev_btn, buttons)
-                        _refresh()
                         prev_btn = buttons
-                        dirty = True
-                    sleep(0.002)
+                        dirty = True       # request display update
                 # If loop stopped, gamepad connection was lost
                 print(GP_DISCON)
                 print(GP_FIND)
