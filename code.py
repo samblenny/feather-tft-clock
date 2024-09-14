@@ -47,25 +47,34 @@ from sevenseg import SevenSeg
 from statemachine import StateMachine
 
 
-def handle_input(machine, prev, buttons):
+def handle_input(machine, prev, buttons, repeat):
     # Respond to gamepad button state change events
     diff = prev ^  buttons
     mh = machine.handleGamepad
-    if (diff & A) and (buttons == A):  # A pressed
-        mh(machine.A)
-    elif (diff & B) and (buttons == B):  # B pressed
-        mh(machine.B)
-    elif (diff & UP) and (buttons == UP):  # UP pressed
-        mh(machine.UP)
-    elif (diff & DOWN) and (buttons == DOWN):  # DOWN pressed
-        mh(machine.DOWN)
-    elif (diff & LEFT) and (buttons == LEFT):  # LEFT pressed
-        mh(machine.LEFT)
-    elif (diff & RIGHT) and (buttons == RIGHT):  # RIGHT pressed
-        mh(machine.RIGHT)
-    elif (diff & START) and (buttons == START):  # START pressed
-        mh(machine.START)
     #print(f"{buttons:016b}")
+
+    if repeat:
+        # Check for hold-time triggered repeating events
+        if (buttons == UP):        # UP held
+            mh(machine.UP, True)
+        elif (buttons == DOWN):    # DOWN held
+            mh(machine.DOWN, True)
+    else:
+        # Check for edge-triggered events
+        if (diff & A) and (buttons == A):  # A pressed
+            mh(machine.A, False)
+        elif (diff & B) and (buttons == B):  # B pressed
+            mh(machine.B, False)
+        elif (diff & UP) and (buttons == UP):  # UP pressed
+            mh(machine.UP, False)
+        elif (diff & DOWN) and (buttons == DOWN):  # DOWN pressed
+            mh(machine.DOWN, repeat)
+        elif (diff & LEFT) and (buttons == LEFT):  # LEFT pressed
+            mh(machine.LEFT, False)
+        elif (diff & RIGHT) and (buttons == RIGHT):  # RIGHT pressed
+            mh(machine.RIGHT, False)
+        elif (diff & START) and (buttons == START):  # START pressed
+            mh(machine.START, False)
 
 
 def elapsed_ms(prev, now):
@@ -127,11 +136,17 @@ def main():
     # Initialize RTC
     rtc = PCF8523.PCF8523(I2C())
     gc.collect()
-    # to set time:
-    # rtc.datetime = struct_time((year, mon, day, hour, min, sec, 0, -1, -1))
+    # Example, reset time to 2024-09-14 01:23:45:
+    # rtc.datetime = struct_time((2024, 9, 14, 1, 23, 45, 0, -1, -1))
 
     # Initialize State Machine
     machine = StateMachine(digits, charLCD, rtc)
+
+    # Gamepad status update strings
+    GP_FIND   = 'Finding USB gamepad'
+    GP_READY  = 'gamepad ready'
+    GP_DISCON = 'gamepad disconnected'
+    GP_ERR    = 'gamepad connection error'
 
     # Cache frequently used callables to save time on dictionary name lookups
     # NOTE: rtc.datetime is a property, so we can't cache it here!
@@ -142,22 +157,9 @@ def main():
     _setMsg = charLCD.setMsg
     _updateDigits = machine.updateDigits
 
-    # Start watching VM millisecond ticks. The point of this is that it should
-    # take fewer clock cycles to check the supervisor ticks than to poll the
-    # RTC over I2C. I2C IO is slow, and constantly banging on the I2C bus might
-    # cause problems. So, use the ticks timer to avoid doing that.
-    prev_ms = _ms()
-
     # Read RTC time and update display digits
-    RTC_MS = const(100)
     prevST = rtc.datetime
     _updateDigits(prevST)
-
-    # Gamepad status update strings
-    GP_FIND   = 'Finding USB gamepad'
-    GP_READY  = 'gamepad ready'
-    GP_DISCON = 'gamepad disconnected'
-    GP_ERR    = 'gamepad connection error'
 
     # MAIN EVENT LOOP
     # Establish and maintain a gamepad connection
@@ -165,23 +167,30 @@ def main():
     print(GP_FIND)
     _setMsg(GP_FIND, top=False)
     _refresh()
-    dirty = False
-    # Outer Loop: Update clock and try to connect to a USB gamepad.
-    # The tick timer checks with ms() help keep the system responsive by rate
-    # limiting I2C and SPI bus activity for polling the RTC, polling the
-    # gamepad, and updating the display.
+    need_refresh = False
+    # OUTER LOOP: Update clock and try to connect to a USB gamepad.
+    # Start timers for RTC polling and gamepad button hold detection. The point
+    # the RTC timer is to avoid burning unecessary clock cycles waiting for the
+    # I2C bus, which is slow.
+    RTC_MS    = const(100)  # RTC poll interval (ms)
+    DELAY_MS  = const(900)  # Gamepad button hold delay before repeat (ms)
+    REPEAT_MS = const(300)  # Gamepad button interval between repeats (ms)
+    prev_ms = _ms()
+    rtc_ms = 0
+    hold_tmr = 0
+    repeat_tmr = 0
     while True:
         _collect()
         now_ms = _ms()
-        if dirty or (_elapsed(prev_ms, now_ms) >= RTC_MS):
+        if need_refresh or (_elapsed(rtc_ms, now_ms) >= RTC_MS):
             # Check clock (RTC) and update time display if needed
-            prev_ms = now_ms
+            rtc_ms = now_ms
             nowST = rtc.datetime
-            if dirty or (nowST != prevST):
+            if need_refresh or (nowST != prevST):
                 prevST = nowST
                 _updateDigits(prevST)
                 _refresh()
-                dirty = False
+                need_refresh = False
         try:
             # Attempt to connect to USB gamepad
             if gp.find_and_configure():
@@ -189,26 +198,52 @@ def main():
                 connected = True
                 _setMsg(GP_READY, top=False)
                 _refresh()
-                # Inner Loop: Update clock and poll gamepad for button events
+                # INNER LOOP: Update clock and poll gamepad for button events
                 prev_btn = 0
+                hold_tmr = 0
+                repeat_tmr = 0
                 for buttons in gp.poll():
+                    # Update timers
                     now_ms = _ms()
+                    interval = _elapsed(prev_ms, now_ms)
+                    prev_ms = now_ms
+                    if buttons == 0:
+                        hold_tmr = 0
+                        repeat_tmr = 0
+                    elif prev_btn != buttons:
+                        hold_tmr = 0
+                        repeat_tmr = 0
+                    else:
+                        hold_tmr += interval
+                        repeat_tmr += interval
                     # Check RTC and update display if needed
-                    if dirty or ( _elapsed(prev_ms, now_ms) >= RTC_MS):
-                        prev_ms = now_ms
+                    if need_refresh or (_elapsed(rtc_ms, now_ms) >= RTC_MS):
+                        rtc_ms = now_ms
                         nowST = rtc.datetime
-                        if dirty or (nowST != prevST):
+                        if need_refresh or (nowST != prevST):
                             prevST = nowST
                             _updateDigits(prevST)
                             _refresh()
                             _collect()
-                            dirty = False
-                    # Handle gamepad input events
-                    sleep(0.002)
+                            need_refresh = False
+                    # Handle hold-time triggered gamepad input events
+                    if hold_tmr >= DELAY_MS:
+                        if hold_tmr == repeat_tmr:
+                            # First re-trigger event after initial delay
+                            repeat_tmr -= DELAY_MS
+                            handle_input(machine, prev_btn, buttons, True)
+                            need_refresh = True
+                        elif repeat_tmr >= REPEAT_MS:
+                            # Another re-trigger event after repeat interval
+                            repeat_tmr -= REPEAT_MS
+                            handle_input(machine, prev_btn, buttons, True)
+                            need_refresh = True
+                    # Handle edge-triggered gamepad input events
                     if prev_btn != buttons:
-                        handle_input(machine, prev_btn, buttons)
-                        prev_btn = buttons
-                        dirty = True       # request display update
+                        handle_input(machine, prev_btn, buttons, False)
+                        need_refresh = True
+                    # Save button values
+                    prev_btn = buttons
                 # If loop stopped, gamepad connection was lost
                 print(GP_DISCON)
                 print(GP_FIND)

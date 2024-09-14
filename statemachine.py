@@ -99,10 +99,13 @@ class StateMachine:
             # for setting the month and day
             _setD('  %02d-%02d' % (st.tm_mon, st.tm_mday))
 
-    def handleGamepad(self, button):
+    def handleGamepad(self, button, repeat):
         # Handle a button press event
+        # args:
+        # - button: one of the button constants
+        # - repeat: True if this is a hold-time triggered repeating event
 
-        # Check lookup table for the response code for this button press event
+        # Check lookup table for the response code for this button event
         if button < UP or button > START:
             print("Button value out of range:", button)
             return
@@ -150,34 +153,65 @@ class StateMachine:
             return
 
         # Third, check for action codes that modify the RTC date or time
-        elif r == _YrInc:
-            # Increment Year
-            now = _fromtimestamp(mktime(_rtc.datetime))
-            _rtc.datetime = (now + timedelta(days=365)).timetuple()
-        elif r == _YrDec:
-            # Decrement Year
-            now = _fromtimestamp(mktime(_rtc.datetime))
-            _rtc.datetime = (now + timedelta(days=-365)).timetuple()
-        elif r == _DayInc:
-            # Increment Day
-            now = _fromtimestamp(mktime(_rtc.datetime))
-            _rtc.datetime = (now + timedelta(days=1)).timetuple()
-        elif r == _DayDec:
-            # Decrement Day
-            now = _fromtimestamp(mktime(_rtc.datetime))
-            _rtc.datetime = (now + timedelta(days=-1)).timetuple()
-        elif r == _MinInc:
-            # Increment Minute
-            now = _fromtimestamp(mktime(_rtc.datetime))
-            _rtc.datetime = (now + timedelta(minutes=1)).timetuple()
-        elif r == _MinDec:
-            # Decrement Minute
-            now = _fromtimestamp(mktime(_rtc.datetime))
-            _rtc.datetime = (now + timedelta(minutes=-1)).timetuple()
-        elif r == _Sec00:
-            # Round seconds to nearest minute
-            nowST = _rtc.datetime
-            now = _fromtimestamp(mktime(nowST))
-            sec = nowST.tm_sec
-            delta = -(sec) if (sec <= 30) else (60-sec)
-            _rtc.datetime = (now + timedelta(seconds=delta)).timetuple()
+        else:
+            # To avoid surprising things like unintentionally changing the day
+            # when you're trying to set the minutes (e.g. crossing midnight),
+            # we need a struct_time object. But, to do math with time deltas in
+            # a way that accounts for leap years, days per month, etc., we need
+            # a datetime object. So, make both:
+            st = _rtc.datetime                  # struct_time
+            now = _fromtimestamp(mktime(st))    # datetime
+            # Unpack the struct_time with shorter names
+            (year, month, day) = (st.tm_year, st.tm_mon, st.tm_mday)
+            (hour, min_, sec) = (st.tm_hour, st.tm_min, st.tm_sec)
+
+            if r == _YrInc:
+                # Increment Year
+                n = 5 if repeat else 1
+                if year + n > 2037:
+                    # Don't go above 2037 because attempting to do so causes
+                    # a CircuitPython long int overflow error. Note that
+                    # 19 January 2038 is the Unix time 32-bit overflow date.
+                    # see https://en.wikipedia.org/wiki/Year_2038_problem
+                    n = 2037 - year
+                _rtc.datetime = (now + timedelta(days=(n*365))).timetuple()
+            elif r == _YrDec:
+                # Decrement Year
+                n = -5 if repeat else -1
+                if year + n < 2001:
+                    # Don't go below 2001 because adafruit_pcf8523 doesn't like
+                    # years below 2000
+                    n = 2001 - year
+                _rtc.datetime = (now + timedelta(days=(n*365))).timetuple()
+            elif r == _DayInc:
+                # Increment Day
+                n = 10 if repeat else 1
+                if (month == 12) and (day + n > 31):
+                    # Do not go past December 31 (avoid changing year)
+                    n = 31 - day
+                _rtc.datetime = (now + timedelta(days=n)).timetuple()
+            elif r == _DayDec:
+                # Decrement Day
+                n = -10 if repeat else -1
+                if (month == 1) and (day + n < 1):
+                    # Do not go past January 1 (avoid changing year)
+                    n = 1 - day
+                _rtc.datetime = (now + timedelta(days=n)).timetuple()
+            elif r == _MinInc:
+                # Increment Minute
+                n = 10 if repeat else 1
+                if (hour == 23) and (min_ + n > 59):
+                    # Do not go past 23:59 (avoid changing day)
+                    n = 59 - min_
+                _rtc.datetime = (now + timedelta(minutes=n)).timetuple()
+            elif r == _MinDec:
+                # Decrement Minute
+                n = -10 if repeat else -1
+                if (hour == 0) and (min_ + n < 0):
+                    # Do not go past 00:00 (avoid changing day)
+                    n = 00 - min_
+                _rtc.datetime = (now + timedelta(minutes=n)).timetuple()
+            elif r == _Sec00:
+                # Round seconds to nearest minute
+                delta = -(sec) if (sec <= 30) else (60-sec)
+                _rtc.datetime = (now + timedelta(seconds=delta)).timetuple()
