@@ -8,8 +8,9 @@
 # | hhmm    | nop    | nop    | mmss    | mmss    | nop     | hhmm | setHMin |
 # | mmss    | nop    | nop    | hhmm    | hhmm    | nop     | hhmm | setHMin |
 # | setYr   | year+1 | year-1 | setSec  | setMDay | setMDay | hhmm | hhmm    |
-# | setMDay | day+1  | day-1  | setYr   | setHMin | setHMin | hhmm | hhmm    |
-# | setHMin | min+1  | min-1  | setMDay | setSec  | setSec  | hhmm | hhmm    |
+# | setMDay | day+1  | day-1  | setYr   | setHour | setHour | hhmm | hhmm    |
+# | setHour | hour+1 | hour-1 | setMDay | setHMin | setHMin | hhmm | hhmm    |
+# | setHMin | min+1  | min-1  | setHour | setSec  | setSec  | hhmm | hhmm    |
 # | setSec  | sec=0  | sec=0  | setHMin | setYr   | setYr   | hhmm | hhmm    |
 #
 # Related documentation:
@@ -28,18 +29,21 @@ _HHMM    = const(0)
 _MMSS    = const(1)
 _SetYr   = const(2)
 _SetMDay = const(3)
-_setHMin = const(4)
-_SetSec  = const(5)
+_SetHour = const(4)
+_SetHMin = const(5)
+_SetSec  = const(6)
 
 # Action Constants (private)
-_NOP    = const(6)
-_YrInc  = const(7)
-_YrDec  = const(8)
-_DayInc = const(9)
-_DayDec = const(10)
-_MinInc = const(11)
-_MinDec = const(12)
-_Sec00  = const(13)
+_NOP    = const(7)
+_YrInc  = const(8)
+_YrDec  = const(9)
+_DayInc = const(10)
+_DayDec = const(11)
+_HrInc  = const(12)
+_HrDec  = const(13)
+_MinInc = const(14)
+_MinDec = const(15)
+_Sec00  = const(16)
 
 
 class StateMachine:
@@ -59,12 +63,13 @@ class StateMachine:
     # short for "No OPeration", and it means to do nothing.
     _TABLE = (
         # UP      DOWN     LEFT      RIGHT     A         B      START       State
-        (_NOP,    _NOP,    _MMSS,    _MMSS,    _NOP,     _HHMM, _setHMin),  # hhmm
-        (_NOP,    _NOP,    _HHMM,    _HHMM,    _NOP,     _HHMM, _setHMin),  # mmss
+        (_NOP,    _NOP,    _MMSS,    _MMSS,    _NOP,     _HHMM, _SetHMin),  # hhmm
+        (_NOP,    _NOP,    _HHMM,    _HHMM,    _NOP,     _HHMM, _SetHMin),  # mmss
         (_YrInc,  _YrDec,  _SetSec,  _SetMDay, _SetMDay, _HHMM, _HHMM   ),  # setYr
-        (_DayInc, _DayDec, _SetYr,   _setHMin, _setHMin, _HHMM, _HHMM   ),  # setMDay
-        (_MinInc, _MinDec, _SetMDay, _SetSec,  _SetSec,  _HHMM, _HHMM   ),  # setHMin
-        (_Sec00,  _Sec00,  _setHMin,  _SetYr,  _SetYr,   _HHMM, _HHMM   ),  # setSec
+        (_DayInc, _DayDec, _SetYr,   _SetHour, _SetHour, _HHMM, _HHMM   ),  # setMDay
+        (_HrInc,  _HrDec,  _SetMDay, _SetHMin, _SetHMin, _HHMM, _HHMM   ),  # setHour
+        (_MinInc, _MinDec, _SetHour, _SetSec,  _SetSec,  _HHMM, _HHMM   ),  # setHMin
+        (_Sec00,  _Sec00,  _SetHMin, _SetYr,   _SetYr,   _HHMM, _HHMM   ),  # setSec
     )
 
     def __init__(self, digits, charLCD, rtc):
@@ -89,7 +94,7 @@ class StateMachine:
             # Full date and time like, "2024-09-12 12:00:01"
             _setM('%04d-%02d-%02d' % (st.tm_year, st.tm_mon, st.tm_mday))
             _setD('%02d:%02d:%02d' % (st.tm_hour, st.tm_min, st.tm_sec))
-        elif (s == _setHMin) or (s == _SetSec):
+        elif (s == _SetHour) or (s == _SetHMin) or (s == _SetSec):
             # for setting hours, minutes, or seconds like, "12:00:01"
             _setD('%02d:%02d:%02d' % (st.tm_hour, st.tm_min, st.tm_sec))
         elif (s == _SetYr):
@@ -139,7 +144,11 @@ class StateMachine:
             self.state = r
             _setM(b'   SET  MONTH-DAY')
             _setM(SET_HELP, top=False)
-        elif r == _setHMin:
+        elif r == _SetHour:
+            self.state = r
+            _setM(b'   SET       HOUR')
+            _setM(SET_HELP, top=False)
+        elif r == _SetHMin:
             self.state = r
             _setM(b'   SET    MINUTES')
             _setM(SET_HELP, top=False)
@@ -197,6 +206,20 @@ class StateMachine:
                     # Do not go past January 1 (avoid changing year)
                     n = 1 - day
                 _rtc.datetime = (now + timedelta(days=n)).timetuple()
+            elif r == _HrInc:
+                # Increment Hour
+                n = 4 if repeat else 1
+                if hour + n > 23:
+                    # Do not go past 23:xx (avoid changing day)
+                    n = 23 - hour
+                _rtc.datetime = (now + timedelta(hours=n)).timetuple()
+            elif r == _HrDec:
+                # Decrement Hour
+                n = -4 if repeat else -1
+                if hour + n < 0:
+                    # Do not go past 00:xx (avoid changing day)
+                    n = 0 - hour
+                _rtc.datetime = (now + timedelta(hours=n)).timetuple()
             elif r == _MinInc:
                 # Increment Minute
                 n = 10 if repeat else 1

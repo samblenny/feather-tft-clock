@@ -68,17 +68,17 @@ work.
 
 ## State Machine
 
-The clock's state machine is moderately complicated. So, I used a spreadsheet
-to make a table of all the states along with actions and state transitions that
-should happen for USB gamepad button presses:
+The clock's state machine is moderately complicated. So, I made a table to help
+me organize all the states along with actions and state transitions:
 
 | State   | UP     | DOWN   | LEFT    | RIGHT   | A       | B    | START   |
 | ------- | ------ | ------ | ------- | ------- | ------- | ---- | ------- |
 | hhmm    | nop    | nop    | mmss    | mmss    | nop     | hhmm | setHMin |
 | mmss    | nop    | nop    | hhmm    | hhmm    | nop     | hhmm | setHMin |
 | setYr   | year+1 | year-1 | setSec  | setMDay | setMDay | hhmm | hhmm    |
-| setMDay | day+1  | day-1  | setYr   | setHMin | setHMin | hhmm | hhmm    |
-| setHMin | min+1  | min-1  | setMDay | setSec  | setSec  | hhmm | hhmm    |
+| setMDay | day+1  | day-1  | setYr   | setHour | setHour | hhmm | hhmm    |
+| setHour | hour+1 | hour-1 | setMDay | setHMin | setHMin | hhmm | hhmm    |
+| setHMin | min+1  | min-1  | setHour | setSec  | setSec  | hhmm | hhmm    |
 | setSec  | sec=0  | sec=0  | setHMin | setYr   | setYr   | hhmm | hhmm    |
 
 
@@ -92,7 +92,8 @@ The state machine has 2 major modes:
 
 2) **Set Mode** lets you set the clock's year, month, day, hour, minutes, and
    seconds. Set Mode has sub-modes for setting the year (setYr), the month and
-   day (setMDay), hours and minutes (setHMin), and seconds (setSec).
+   day (setMDay), hours (setHour), hours and minutes (setHMin), and seconds
+   (setSec).
 
 
 ### Button Actions
@@ -103,8 +104,10 @@ Clock Mode (all sub-modes):
 - **START**: Switch to Set Mode
 
 Set Mode (sub-modes: year, month-day, hours-minutes):
-- **UP**: Add 1 to the value being set
-- **DOWN**: Subtract 1 from the value being set
+- **UP**: Add 1 to the value being set, press and hold to increment the value
+  faster
+- **DOWN**: Subtract 1 from the value being set, press and hold to decrement
+  the value faster
 - **A** or **RIGHT**: Advance to the next sub-mode
 - **LEFT**: Switch to the previous sub-mode
 - **B** or **START**: Switch back to Clock Mode
