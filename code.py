@@ -133,7 +133,8 @@ def main():
     # Initialize State Machine
     machine = StateMachine(digits, charLCD, rtc)
 
-    # Caching frequently used objects saves time on dictionary name lookups
+    # Cache frequently used callables to save time on dictionary name lookups
+    # NOTE: rtc.datetime is a property, so we can't cache it here!
     _collect = gc.collect
     _elapsed = elapsed_ms
     _ms = ticks_ms
@@ -155,9 +156,9 @@ def main():
     # MAIN EVENT LOOP
     # Establish and maintain a gamepad connection
     gp = XInputGamepad()
-    FINDING = b'Finding USB gamepad'
-    print("Looking for USB gamepad...")
-    _setMsg(FINDING, top=False)
+    FINDING_GP = 'Finding USB gamepad'
+    print(FINDING_GP)
+    _setMsg(FINDING_GP, top=False)
     _refresh()
     dirty = False
     # Outer Loop: Update clock and try to connect to a USB gamepad.
@@ -206,8 +207,8 @@ def main():
                     sleep(0.002)
                 # If loop stopped, gamepad connection was lost
                 print("Gamepad disconnected")
-                print("Looking for USB gamepad...")
-                _setMsg(FINDING, top=False)
+                print(FINDING_GP)
+                _setMsg(FINDING_GP, top=False)
                 _refresh()
             else:
                 # No connection yet, so sleep briefly then try again
@@ -218,8 +219,8 @@ def main():
             # know how to deal with. So, log the error and keep going
             print(e)
             print("Gamepad connection error")
-            print("Looking for USB gamepad...")
-            _setMsg(FINDING, top=False)
+            print(FINDING_GP)
+            _setMsg(FINDING_GP, top=False)
             _refresh()
 
 
