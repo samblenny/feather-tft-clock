@@ -2,20 +2,40 @@
 <!-- SPDX-FileCopyrightText: Copyright 2024 Sam Blenny -->
 # Feather TFT Clock
 
-**WORK IN PROGRESS (ALPHA)**
-
-This clock project demonstrates how to build a USB gamepad controlled user
-interface with sprites. The display uses TileGrid sprites that I made in Krita.
-The code shows how to use a state machine to model the behavior of a clock.
-This photo shows my clock code running on an Adafruit Feather TFT:
+This clock project uses USB gamepad input to control its time setting menu. The
+display uses TileGrid sprites that I made in Krita. The code demonstrates how
+to use timers and a state machine to build an event loop with gamepad input,
+I2C real time clock IO, and display updates.
 
 ![photo of clock code running on a Feather TFT board with Adalogger and USB Host boards](feather-tft-clock.jpeg)
 
 
+## Overview and Context
+
+This clock is a step along the way on my quest towards learning how to build
+little games and apps in CircuitPython. The look for the display theme is about
+digital watches and alarm clocks from the 80's and 90's.
+
+Some of the technical bits and pieces from this project that you might be able
+to reuse in your own projects include:
+
+- Menu system for manually setting time and date
+
+- USB gamepad input system with edge-triggered button press events and
+  repeating timer-triggered button hold events
+
+- Data-watch style display theme with three display areas: 20 ASCII characters
+  at the top, an eight digit 7-segment clock display in the middle, and another
+  20 ASCII character display at the bottom
+
+- Main event loop with gamepad button polling, real time clock polling, state
+  machine updates and display updates
+
+
 ## Sprites and Krita
 
-To make the sprites in Krita for 7-segment digits and ASCII characters, I used
-the "Pixel Art" brush preset with a custom palette swatch.
+To make the sprites in Krita for 7-segment digits and data-watch style ASCII
+characters, I used the "Pixel Art" brush preset with a custom palette swatch.
 
 
 ### Clock Digit Sprites
@@ -104,9 +124,9 @@ Clock Mode (all sub-modes):
 - **START**: Switch to Set Mode
 
 Set Mode (sub-modes: year, month-day, hours-minutes):
-- **UP**: Add 1 to the value being set, press and hold to increment the value
-  faster
-- **DOWN**: Subtract 1 from the value being set, press and hold to decrement
+- **UP**: Add 1 to the value being set, or press and hold to increment the
+  value faster
+- **DOWN**: Subtract 1 from the value being set, or press and hold to decrement
   the value faster
 - **A** or **RIGHT**: Advance to the next sub-mode
 - **LEFT**: Switch to the previous sub-mode
@@ -338,14 +358,32 @@ learn guide.
 
 ## Running the Code
 
-1. Connect the USB gamepad to the MAX3421E USB Host Featherwing before applying
-   power to the Feather TFT. (USB hot plugging may be unreliable)
+1. Connect the USB gamepad to the MAX3421E USB Host Featherwing.
 
 2. Plug a computer or charger into the Feather TFT ESP32-S3 USB C port.
 
-<!-- =============================================================== -->
-<!-- =============================================================== -->
-[**TODO:** Finish this]
-<!-- =============================================================== -->
-<!-- =============================================================== -->
+CAUTION: This code was tested with an 8BitDo SN30 Pro USB wired gamepad, which
+uses the XInput protocol and identifies itself with the vendor and product IDs
+of an Xbox 360 gamepad (045e:028e). This code may not work properly with other
+gamepads.
 
+
+## Understanding the Code
+
+1. The `main()` function in `code.py` initializes objects for the data-watch
+   display theme, USB gamepad input, the real time clock, and the state
+   machine. It also has the main event loop that coordinates gamepad polling
+   and clock display updates. The timers for gamepad repeating timer-triggered
+   button hold events are part of the main event loop.
+
+2. The `XInputGamepad` class from `gamepad.py` handles low-level USB gamepad
+   details.
+
+3. The `SevenSeg` and `CharLCD` classes from `sevenseg.py` and `charldcd.py`
+   implement the 7-segment and ASCII character display with
+   `displayio.TileGrid` sprites.
+
+4. The `StateMachine` class from `statemachine.py` implements the logic to
+   model the behavior of the clocks time display and time setting modes. The
+   code for setting the Adalogger's PCF8523 Real Time Clock is in
+   `StateMachine.handleDigits`.
