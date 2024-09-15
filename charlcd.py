@@ -22,7 +22,7 @@ class CharLCD:
         # Load font spritesheet into Bitmap and Palette objects
         gc.collect()
         (bmp, pal) = adafruit_imageload.load(
-            "ASCII-font.bmp", bitmap=Bitmap, palette=Palette)
+            "ascii-font.bmp", bitmap=Bitmap, palette=Palette)
         gc.collect()
         # Make a Group with TileGrids for the top line, with top left corner at
         # (x0, y0), and the bottom line, with top left corner at (x1, y1)
