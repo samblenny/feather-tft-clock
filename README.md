@@ -99,7 +99,8 @@ me organize all the states along with actions and state transitions:
 | setMDay | day+1  | day-1  | setYr   | setHour | setHour | hhmm | hhmm    |
 | setHour | hour+1 | hour-1 | setMDay | setHMin | setHMin | hhmm | hhmm    |
 | setHMin | min+1  | min-1  | setHour | setSec  | setSec  | hhmm | hhmm    |
-| setSec  | sec=0  | sec=0  | setHMin | setYr   | setYr   | hhmm | hhmm    |
+| setSec  | sec=0  | sec=0  | setHMin | setCal  | setYr   | hhmm | hhmm    |
+| setCal  | cal+1  | cal-1  | setSec  | setYr   | setYr   | hhmm | hhmm    |
 
 
 ### Major Modes and Sub-modes
@@ -110,10 +111,10 @@ The state machine has 2 major modes:
    minimal hour and minute display (hhmm) and a fancier display with full date
    and time including seconds (mmss).
 
-2) **Set Mode** lets you set the clock's year, month, day, hour, minutes, and
-   seconds. Set Mode has sub-modes for setting the year (setYr), the month and
-   day (setMDay), hours (setHour), hours and minutes (setHMin), and seconds
-   (setSec).
+2) **Set Mode** lets you set the clock's year, month, day, hour, minutes,
+   seconds, and calibration. Set Mode has sub-modes for setting the year
+   (setYr), the month and day (setMDay), hours (setHour), hours and minutes
+   (setHMin), seconds (setSec), and PCF8523 RTC calibration register (setCal).
 
 
 ### Button Actions
@@ -134,6 +135,13 @@ Set Mode (sub-modes: year, month-day, hours-minutes):
 
 Set Mode (sub-mode: seconds):
 - **UP** or **DOWN**: Set seconds to 00, rounding minutes to closest minute
+- **A** or **RIGHT**: Advance to the next sub-mode
+- **LEFT**: Switch to the previous sub-mode
+- **B** or **START**: Switch back to Clock Mode
+
+Set Mode (sub-mode: calibration):
+- **UP**: Add 1 to the clock drift compensation calibration register
+- **UP**: Subtract 1 from the clock drift compensation calibration register
 - **A** or **RIGHT**: Advance to the next sub-mode
 - **LEFT**: Switch to the previous sub-mode
 - **B** or **START**: Switch back to Clock Mode

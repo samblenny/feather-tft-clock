@@ -11,7 +11,8 @@
 # | setMDay | day+1  | day-1  | setYr   | setHour | setHour | hhmm | hhmm    |
 # | setHour | hour+1 | hour-1 | setMDay | setHMin | setHMin | hhmm | hhmm    |
 # | setHMin | min+1  | min-1  | setHour | setSec  | setSec  | hhmm | hhmm    |
-# | setSec  | sec=0  | sec=0  | setHMin | setYr   | setYr   | hhmm | hhmm    |
+# | setSec  | sec=0  | sec=0  | setHMin | setCal  | setYr   | hhmm | hhmm    |
+# | setCal  | cal+1  | cal-1  | setSec  | setYr   | setYr   | hhmm | hhmm    |
 #
 # Related documentation:
 # - https://docs.circuitpython.org/projects/datetime/en/latest/api.html
@@ -32,18 +33,21 @@ _SetMDay = const(3)
 _SetHour = const(4)
 _SetHMin = const(5)
 _SetSec  = const(6)
+_SetCal  = const(7)
 
 # Action Constants (private)
-_NOP    = const(7)
-_YrInc  = const(8)
-_YrDec  = const(9)
-_DayInc = const(10)
-_DayDec = const(11)
-_HrInc  = const(12)
-_HrDec  = const(13)
-_MinInc = const(14)
-_MinDec = const(15)
-_Sec00  = const(16)
+_NOP    = const(8)
+_YrInc  = const(9)
+_YrDec  = const(10)
+_DayInc = const(11)
+_DayDec = const(12)
+_HrInc  = const(13)
+_HrDec  = const(14)
+_MinInc = const(15)
+_MinDec = const(16)
+_Sec00  = const(17)
+_CalInc = const(18)
+_CalDec = const(19)
 
 
 class StateMachine:
@@ -65,11 +69,12 @@ class StateMachine:
         # UP      DOWN     LEFT      RIGHT     A         B      START       State
         (_NOP,    _NOP,    _MMSS,    _MMSS,    _NOP,     _HHMM, _SetHMin),  # hhmm
         (_NOP,    _NOP,    _HHMM,    _HHMM,    _NOP,     _HHMM, _SetHMin),  # mmss
-        (_YrInc,  _YrDec,  _SetSec,  _SetMDay, _SetMDay, _HHMM, _HHMM   ),  # setYr
+        (_YrInc,  _YrDec,  _SetCal,  _SetMDay, _SetMDay, _HHMM, _HHMM   ),  # setYr
         (_DayInc, _DayDec, _SetYr,   _SetHour, _SetHour, _HHMM, _HHMM   ),  # setMDay
         (_HrInc,  _HrDec,  _SetMDay, _SetHMin, _SetHMin, _HHMM, _HHMM   ),  # setHour
         (_MinInc, _MinDec, _SetHour, _SetSec,  _SetSec,  _HHMM, _HHMM   ),  # setHMin
-        (_Sec00,  _Sec00,  _SetHMin, _SetYr,   _SetYr,   _HHMM, _HHMM   ),  # setSec
+        (_Sec00,  _Sec00,  _SetHMin, _SetCal,  _SetCal,  _HHMM, _HHMM   ),  # setSec
+        (_CalInc, _CalDec, _SetSec,  _SetYr,   _SetYr,   _HHMM, _HHMM   ),  # setCal
     )
 
     def __init__(self, digits, charLCD, rtc):
@@ -103,6 +108,9 @@ class StateMachine:
         elif (s == _SetMDay):
             # for setting the month and day
             _setD('  %02d-%02d' % (st.tm_mon, st.tm_mday))
+        elif (s == _SetCal):
+            # for setting the PCF8523 real time clock calibration register
+            _setD('     %+2d' % self.rtc.calibration)
 
     def handleGamepad(self, button, repeat):
         # Handle a button press event
@@ -156,6 +164,10 @@ class StateMachine:
             self.state = r
             _setM(b'   SET    SECONDS')
             _setM(SET_HELP_SEC, top=False)
+        elif r == _SetCal:
+            self.state = r
+            _setM(b'   SET    RTC CAL')
+            _setM(SET_HELP, top=False)
 
         # Second, check for action codes that don't change the state
         elif r == _NOP:
@@ -238,3 +250,15 @@ class StateMachine:
                 # Round seconds to nearest minute
                 delta = -(sec) if (sec <= 30) else (60-sec)
                 _rtc.datetime = (now + timedelta(seconds=delta)).timetuple()
+                # Print number of seconds of drift adjustment (for calibration)
+                print("drift adjustment:", delta, "s")
+            elif r == _CalInc:
+                # Increment PCF8523 calibration register (upper limit: +5)
+                cal = _rtc.calibration
+                if cal < 5:
+                    _rtc.calibration = cal + 1
+            elif r == _CalDec:
+                # Decrement PCF8523 calibration register (lower limit: -5)
+                cal = _rtc.calibration
+                if cal > -5:
+                    _rtc.calibration = cal - 1

@@ -135,6 +135,7 @@ def main():
 
     # Initialize RTC
     rtc = PCF8523.PCF8523(I2C())
+    print("RTC calibration:", rtc.calibration)
     gc.collect()
     # Example, reset time to 2024-09-14 01:23:45:
     # rtc.datetime = struct_time((2024, 9, 14, 1, 23, 45, 0, -1, -1))
